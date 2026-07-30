@@ -234,6 +234,7 @@
     setupPanel.hidden = true;
     progressSummary.hidden = false;
     mainContent.hidden = false;
+    el("appFooter").hidden = false;
     renderAll();
   }
 
@@ -255,6 +256,7 @@
   el("editDueDateBtn").addEventListener("click", () => {
     progressSummary.hidden = true;
     mainContent.hidden = true;
+    el("appFooter").hidden = true;
     setupPanel.hidden = false;
     el("dueDateInput").value = state.dueDate || "";
     el("setupFamilyCode").value = state.familyCode || "";
