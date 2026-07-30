@@ -4,6 +4,7 @@
   const DUE_KEY = "cdv_dueDate";
   const CODE_KEY = "cdv_familyCode";
   const CUSTOM_KEY = "cdv_customItems";
+  const HIDDEN_KEY = "cdv_hiddenBase";
   const WEEKS_TOTAL = 40;
 
   const el = (id) => document.getElementById(id);
@@ -17,7 +18,8 @@
     dueDate: localStorage.getItem(DUE_KEY) || null,
     familyCode: localStorage.getItem(CODE_KEY) || null,
     completed: {}, // { itemId: true }
-    customItems: JSON.parse(localStorage.getItem(CUSTOM_KEY) || "[]") // [{id, trimester, title, note}]
+    customItems: JSON.parse(localStorage.getItem(CUSTOM_KEY) || "[]"), // [{id, trimester, title, note}]
+    hiddenBaseIds: JSON.parse(localStorage.getItem(HIDDEN_KEY) || "[]") // ids d'étapes prédéfinies supprimées
   };
 
   let db = null;
@@ -73,6 +75,7 @@
             dueDate: state.dueDate,
             completed: state.completed,
             customItems: state.customItems,
+            hiddenBaseIds: state.hiddenBaseIds,
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
           });
           return;
@@ -85,7 +88,9 @@
         }
         state.completed = data.completed || {};
         state.customItems = data.customItems || [];
+        state.hiddenBaseIds = data.hiddenBaseIds || [];
         localStorage.setItem(CUSTOM_KEY, JSON.stringify(state.customItems));
+        localStorage.setItem(HIDDEN_KEY, JSON.stringify(state.hiddenBaseIds));
         renderAll();
         hideBanner();
       },
@@ -107,6 +112,7 @@
         dueDate: state.dueDate,
         completed: state.completed,
         customItems: state.customItems,
+        hiddenBaseIds: state.hiddenBaseIds,
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
       },
       { merge: true }
@@ -178,7 +184,7 @@
   // Rendu de la checklist
   // ----------------------------------------------------------
   function itemsForTrimester(tri) {
-    const base = CHECKLIST_DATA[tri] || [];
+    const base = (CHECKLIST_DATA[tri] || []).filter((i) => !state.hiddenBaseIds.includes(i.id));
     const custom = state.customItems.filter((c) => String(c.trimester) === String(tri));
     return base.concat(custom);
   }
@@ -211,10 +217,14 @@
 
         btn.addEventListener("click", () => toggleItem(item.id, btn, li));
 
-        if (item.custom) {
-          deleteBtn.hidden = false;
-          deleteBtn.addEventListener("click", () => deleteCustomItem(item.id));
-        }
+        deleteBtn.hidden = false;
+        deleteBtn.addEventListener("click", () => {
+          if (item.custom) {
+            deleteCustomItem(item.id);
+          } else {
+            deleteBaseItem(item.id);
+          }
+        });
 
         list.appendChild(tpl);
       });
@@ -277,6 +287,22 @@
 
   function saveCustomItems() {
     localStorage.setItem(CUSTOM_KEY, JSON.stringify(state.customItems));
+  }
+
+  function saveHiddenBase() {
+    localStorage.setItem(HIDDEN_KEY, JSON.stringify(state.hiddenBaseIds));
+  }
+
+  function deleteBaseItem(id) {
+    if (!window.confirm("Supprimer cette étape de votre checklist ? Vous pourrez la retrouver en réinitialisant votre carnet.")) {
+      return;
+    }
+    state.hiddenBaseIds.push(id);
+    delete state.completed[id];
+    saveHiddenBase();
+    renderChecklists();
+    renderProgress();
+    pushToCloud();
   }
 
   function addCustomItem(trimester, title, note) {
