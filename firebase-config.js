@@ -11,12 +11,12 @@
 // ============================================================
 
 const FIREBASE_CONFIG = {
-  apiKey: "REMPLACE_MOI",
-  authDomain: "REMPLACE_MOI.firebaseapp.com",
-  projectId: "REMPLACE_MOI",
-  storageBucket: "REMPLACE_MOI.appspot.com",
-  messagingSenderId: "REMPLACE_MOI",
-  appId: "REMPLACE_MOI"
+  apiKey: "AIzaSyAkPXaSFpu_OesPhjGfVmiryBshGHcLvEM",
+  authDomain: "carnet-de-voyage-f7f5d.firebaseapp.com",
+  projectId: "carnet-de-voyage-f7f5d",
+  storageBucket: "carnet-de-voyage-f7f5d.firebasestorage.app",
+  messagingSenderId: "988440844442",
+  appId: "1:988440844442:web:b321b935f847bb993f2723"
 };
 
 // Ne pas modifier : indique à app.js si la config a été remplie.
