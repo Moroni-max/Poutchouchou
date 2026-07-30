@@ -398,9 +398,65 @@ input[type="date"], input[type="text"] {
   border-color: var(--ink-soft);
 }
 
-/* ============================================================
-   FOOTER
-   ============================================================ */
+.delete-btn {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--ink-soft);
+  font-size: 1.1rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.55;
+}
+.delete-btn:hover {
+  opacity: 1;
+  border-color: var(--rust);
+  color: var(--rust);
+}
+
+/* Ajout d'étape personnalisée */
+.add-item-row {
+  list-style: none;
+}
+
+.btn-add-step {
+  width: 100%;
+  background: transparent;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+  padding: 0.7rem 1rem;
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+  font-family: var(--font-mono);
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+.btn-add-step:hover {
+  border-color: var(--ochre-deep);
+  color: var(--ochre-deep);
+}
+
+.add-item-form {
+  background: rgba(255,255,255,0.5);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 0.9rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+.add-item-form input {
+  width: 100%;
+}
+.add-item-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
 .app-footer {
   margin-top: 2.5rem;
   padding: 1.5rem;

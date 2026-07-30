@@ -3,6 +3,7 @@
 
   const DUE_KEY = "cdv_dueDate";
   const CODE_KEY = "cdv_familyCode";
+  const CUSTOM_KEY = "cdv_customItems";
   const WEEKS_TOTAL = 40;
 
   const el = (id) => document.getElementById(id);
@@ -15,7 +16,8 @@
   let state = {
     dueDate: localStorage.getItem(DUE_KEY) || null,
     familyCode: localStorage.getItem(CODE_KEY) || null,
-    completed: {} // { itemId: true }
+    completed: {}, // { itemId: true }
+    customItems: JSON.parse(localStorage.getItem(CUSTOM_KEY) || "[]") // [{id, trimester, title, note}]
   };
 
   let db = null;
@@ -70,6 +72,7 @@
           docRef.set({
             dueDate: state.dueDate,
             completed: state.completed,
+            customItems: state.customItems,
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
           });
           return;
@@ -81,6 +84,8 @@
           localStorage.setItem(DUE_KEY, state.dueDate);
         }
         state.completed = data.completed || {};
+        state.customItems = data.customItems || [];
+        localStorage.setItem(CUSTOM_KEY, JSON.stringify(state.customItems));
         renderAll();
         hideBanner();
       },
@@ -101,6 +106,7 @@
       {
         dueDate: state.dueDate,
         completed: state.completed,
+        customItems: state.customItems,
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
       },
       { merge: true }
@@ -171,16 +177,29 @@
   // ----------------------------------------------------------
   // Rendu de la checklist
   // ----------------------------------------------------------
+  function itemsForTrimester(tri) {
+    const base = CHECKLIST_DATA[tri] || [];
+    const custom = state.customItems.filter((c) => String(c.trimester) === String(tri));
+    return base.concat(custom);
+  }
+
+  function allItems() {
+    return Object.keys(CHECKLIST_DATA)
+      .map((tri) => itemsForTrimester(tri))
+      .flat();
+  }
+
   function renderChecklists() {
     Object.keys(CHECKLIST_DATA).forEach((tri) => {
       const list = el("checklist-" + tri);
       list.innerHTML = "";
-      CHECKLIST_DATA[tri].forEach((item) => {
+      itemsForTrimester(tri).forEach((item) => {
         const tpl = el("checklistItemTemplate").content.cloneNode(true);
         const li = tpl.querySelector(".checklist-item");
         const btn = tpl.querySelector(".check-btn");
         const title = tpl.querySelector(".item-title");
         const note = tpl.querySelector(".item-note");
+        const deleteBtn = tpl.querySelector(".delete-btn");
 
         title.textContent = item.title;
         note.textContent = item.note || "";
@@ -192,9 +211,90 @@
 
         btn.addEventListener("click", () => toggleItem(item.id, btn, li));
 
+        if (item.custom) {
+          deleteBtn.hidden = false;
+          deleteBtn.addEventListener("click", () => deleteCustomItem(item.id));
+        }
+
         list.appendChild(tpl);
       });
+
+      renderAddForm(tri, list);
     });
+  }
+
+  function renderAddForm(tri, list) {
+    const wrapper = document.createElement("li");
+    wrapper.className = "add-item-row";
+
+    const toggleBtn = document.createElement("button");
+    toggleBtn.type = "button";
+    toggleBtn.className = "btn-add-step";
+    toggleBtn.textContent = "+ Ajouter une étape";
+
+    const form = document.createElement("div");
+    form.className = "add-item-form";
+    form.hidden = true;
+    form.innerHTML = `
+      <input type="text" class="add-item-title" placeholder="Intitulé de l'étape" maxlength="120" />
+      <input type="text" class="add-item-note" placeholder="Détail (facultatif)" maxlength="200" />
+      <div class="add-item-actions">
+        <button type="button" class="btn-ghost add-item-cancel">Annuler</button>
+        <button type="button" class="btn-primary add-item-confirm">Ajouter</button>
+      </div>
+    `;
+
+    toggleBtn.addEventListener("click", () => {
+      form.hidden = false;
+      toggleBtn.hidden = true;
+      form.querySelector(".add-item-title").focus();
+    });
+
+    form.querySelector(".add-item-cancel").addEventListener("click", () => {
+      form.hidden = true;
+      toggleBtn.hidden = false;
+    });
+
+    form.querySelector(".add-item-confirm").addEventListener("click", () => {
+      const titleInput = form.querySelector(".add-item-title");
+      const noteInput = form.querySelector(".add-item-note");
+      const title = titleInput.value.trim();
+      if (!title) {
+        titleInput.focus();
+        return;
+      }
+      addCustomItem(tri, title, noteInput.value.trim());
+      form.hidden = true;
+      toggleBtn.hidden = false;
+      titleInput.value = "";
+      noteInput.value = "";
+    });
+
+    wrapper.appendChild(toggleBtn);
+    wrapper.appendChild(form);
+    list.appendChild(wrapper);
+  }
+
+  function saveCustomItems() {
+    localStorage.setItem(CUSTOM_KEY, JSON.stringify(state.customItems));
+  }
+
+  function addCustomItem(trimester, title, note) {
+    const id = "custom-" + Date.now() + "-" + Math.random().toString(36).slice(2, 7);
+    state.customItems.push({ id, trimester: String(trimester), title, note, custom: true });
+    saveCustomItems();
+    renderChecklists();
+    renderProgress();
+    pushToCloud();
+  }
+
+  function deleteCustomItem(id) {
+    state.customItems = state.customItems.filter((c) => c.id !== id);
+    delete state.completed[id];
+    saveCustomItems();
+    renderChecklists();
+    renderProgress();
+    pushToCloud();
   }
 
   function toggleItem(id, btn, li) {
@@ -213,9 +313,9 @@
   }
 
   function renderProgress() {
-    const allItems = Object.values(CHECKLIST_DATA).flat();
-    const doneCount = allItems.filter((i) => state.completed[i.id]).length;
-    const pct = allItems.length ? Math.round((doneCount / allItems.length) * 100) : 0;
+    const items = allItems();
+    const doneCount = items.filter((i) => state.completed[i.id]).length;
+    const pct = items.length ? Math.round((doneCount / items.length) * 100) : 0;
     el("overallProgressFill").style.width = pct + "%";
     el("overallProgressLabel").textContent = pct + " % préparé";
   }
