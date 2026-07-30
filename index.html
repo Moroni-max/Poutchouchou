@@ -68,67 +68,79 @@
 
   <main id="mainContent" hidden>
 
-    <div class="overall-progress">
-      <div class="overall-progress-track">
-        <div class="overall-progress-fill" id="overallProgressFill"></div>
+    <nav class="app-tabs" id="appTabs" role="tablist" aria-label="Sections du carnet">
+      <button type="button" class="tab-btn is-active" data-tab="accueil" role="tab" aria-selected="true">Accueil</button>
+      <button type="button" class="tab-btn" data-tab="journal" role="tab" aria-selected="false">Journal</button>
+    </nav>
+
+    <div class="tab-panel" data-tab-panel="accueil">
+
+      <div class="overall-progress">
+        <div class="overall-progress-track">
+          <div class="overall-progress-fill" id="overallProgressFill"></div>
+        </div>
+        <span class="overall-progress-label" id="overallProgressLabel">0 % préparé</span>
       </div>
-      <span class="overall-progress-label" id="overallProgressLabel">0 % préparé</span>
+
+      <section class="postcard" id="postcardSection">
+        <div class="postcard-inner">
+          <div class="postcard-icon" id="postcardIcon"></div>
+          <div class="postcard-text">
+            <p class="postcard-eyebrow">Carte postale — <span id="postcardWeekLabel">semaine —</span></p>
+            <p class="postcard-size">Bébé fait à peu près la taille de <strong id="postcardSizeName">—</strong></p>
+            <p class="postcard-note" id="postcardNote"></p>
+          </div>
+          <div class="postcard-stamp" id="postcardStamp"></div>
+        </div>
+      </section>
+
+      <section class="trimester-section" data-trimester="1">
+        <h2><span class="stage-eyebrow">Étape I</span> Premier trimestre <span class="week-range">SA 1 – 13</span></h2>
+        <ul class="checklist" id="checklist-1"></ul>
+      </section>
+
+      <section class="trimester-section" data-trimester="2">
+        <h2><span class="stage-eyebrow">Étape II</span> Deuxième trimestre <span class="week-range">SA 14 – 27</span></h2>
+        <ul class="checklist" id="checklist-2"></ul>
+      </section>
+
+      <section class="trimester-section" data-trimester="3">
+        <h2><span class="stage-eyebrow">Étape III</span> Troisième trimestre <span class="week-range">SA 28 – 40</span></h2>
+        <ul class="checklist" id="checklist-3"></ul>
+      </section>
+
+      <section class="trimester-section" data-trimester="4">
+        <h2><span class="stage-eyebrow">Arrivée</span> Après la naissance <span class="week-range">J0 – J30</span></h2>
+        <ul class="checklist" id="checklist-4"></ul>
+      </section>
+
     </div>
 
-    <section class="postcard" id="postcardSection">
-      <div class="postcard-inner">
-        <div class="postcard-icon" id="postcardIcon"></div>
-        <div class="postcard-text">
-          <p class="postcard-eyebrow">Carte postale — <span id="postcardWeekLabel">semaine —</span></p>
-          <p class="postcard-size">Bébé fait à peu près la taille de <strong id="postcardSizeName">—</strong></p>
-          <p class="postcard-note" id="postcardNote"></p>
-        </div>
-        <div class="postcard-stamp" id="postcardStamp"></div>
-      </div>
-    </section>
+    <div class="tab-panel" data-tab-panel="journal" hidden>
 
+      <section class="journal-section">
+        <h2><span class="stage-eyebrow">Carnet</span> Journal de ressenti</h2>
 
-    <section class="trimester-section" data-trimester="1">
-      <h2><span class="stage-eyebrow">Étape I</span> Premier trimestre <span class="week-range">SA 1 – 13</span></h2>
-      <ul class="checklist" id="checklist-1"></ul>
-    </section>
-
-    <section class="trimester-section" data-trimester="2">
-      <h2><span class="stage-eyebrow">Étape II</span> Deuxième trimestre <span class="week-range">SA 14 – 27</span></h2>
-      <ul class="checklist" id="checklist-2"></ul>
-    </section>
-
-    <section class="trimester-section" data-trimester="3">
-      <h2><span class="stage-eyebrow">Étape III</span> Troisième trimestre <span class="week-range">SA 28 – 40</span></h2>
-      <ul class="checklist" id="checklist-3"></ul>
-    </section>
-
-    <section class="trimester-section" data-trimester="4">
-      <h2><span class="stage-eyebrow">Arrivée</span> Après la naissance <span class="week-range">J0 – J30</span></h2>
-      <ul class="checklist" id="checklist-4"></ul>
-    </section>
-
-    <section class="journal-section">
-      <h2><span class="stage-eyebrow">Carnet</span> Journal de ressenti</h2>
-
-      <div class="journal-form">
-        <div class="journal-row-labels">
-          <span>Qui écrit ?</span>
-          <span>Comment ça va ?</span>
-        </div>
-        <div class="journal-controls">
-          <div class="journal-author-toggle" id="journalAuthorToggle" role="group" aria-label="Auteur de la note">
-            <button type="button" class="author-btn" data-author="maman">Maman</button>
-            <button type="button" class="author-btn" data-author="papa">Papa</button>
+        <div class="journal-form">
+          <div class="journal-row-labels">
+            <span>Qui écrit ?</span>
+            <span>Comment ça va ?</span>
           </div>
-          <div class="journal-mood-row" id="journalMoodRow"></div>
+          <div class="journal-controls">
+            <div class="journal-author-toggle" id="journalAuthorToggle" role="group" aria-label="Auteur de la note">
+              <button type="button" class="author-btn" data-author="maman">Maman</button>
+              <button type="button" class="author-btn" data-author="papa">Papa</button>
+            </div>
+            <div class="journal-mood-row" id="journalMoodRow"></div>
+          </div>
+          <textarea id="journalText" placeholder="Un ressenti, un symptôme, une envie, un moment à garder..." maxlength="600" rows="3"></textarea>
+          <button type="button" class="btn-primary" id="journalSubmitBtn">Ajouter au journal</button>
         </div>
-        <textarea id="journalText" placeholder="Un ressenti, un symptôme, une envie, un moment à garder..." maxlength="600" rows="3"></textarea>
-        <button type="button" class="btn-primary" id="journalSubmitBtn">Ajouter au journal</button>
-      </div>
 
-      <ul class="journal-list" id="journalList"></ul>
-    </section>
+        <ul class="journal-list" id="journalList"></ul>
+      </section>
+
+    </div>
 
   </main>
 

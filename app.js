@@ -49,17 +49,21 @@
     try {
       firebase.initializeApp(FIREBASE_CONFIG);
       db = firebase.firestore();
-      db.enablePersistence().catch((err) => {
-        // "failed-precondition" = plusieurs onglets ouverts, "unimplemented" = navigateur non compatible.
-        // Dans ces cas, l'appli continue de fonctionner, juste sans ce filet de sécurité hors-ligne.
-        console.warn("Persistance hors-ligne non activée :", err.code);
-      });
-      return true;
     } catch (e) {
       console.error("Erreur d'initialisation Firebase :", e);
       showBanner("Connexion au carnet partagé impossible — les données restent enregistrées sur cet appareil uniquement.");
       return false;
     }
+    try {
+      db.enablePersistence().catch((err) => {
+        // "failed-precondition" = plusieurs onglets ouverts, "unimplemented" = navigateur non compatible.
+        // Dans ces cas, l'appli continue de fonctionner, juste sans ce filet de sécurité hors-ligne.
+        console.warn("Persistance hors-ligne non activée :", err.code);
+      });
+    } catch (err) {
+      console.warn("Persistance hors-ligne non disponible sur ce navigateur :", err);
+    }
+    return true;
   }
 
   function showBanner(msg) {
@@ -582,7 +586,10 @@
     localStorage.setItem(DUE_KEY, due);
     localStorage.setItem(CODE_KEY, code);
     showApp();
-    if (db) connectToDoc();
+    if (db) {
+      connectToDoc();
+      pushToCloud();
+    }
   });
 
   el("editDueDateBtn").addEventListener("click", () => {
@@ -612,8 +619,28 @@
   });
 
   // ----------------------------------------------------------
+  // Onglets
+  // ----------------------------------------------------------
+  function setupTabs() {
+    const tabButtons = document.querySelectorAll(".tab-btn");
+    tabButtons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const target = btn.dataset.tab;
+        tabButtons.forEach((b) => {
+          b.classList.toggle("is-active", b === btn);
+          b.setAttribute("aria-selected", String(b === btn));
+        });
+        document.querySelectorAll(".tab-panel").forEach((panel) => {
+          panel.hidden = panel.dataset.tabPanel !== target;
+        });
+      });
+    });
+  }
+
+  // ----------------------------------------------------------
   // Init
   // ----------------------------------------------------------
+  setupTabs();
   setupJournalForm();
   const firebaseReady = initFirebase();
 

@@ -459,6 +459,42 @@ input[type="date"], input[type="text"] {
 }
 
 /* ============================================================
+   ONGLETS
+   ============================================================ */
+.app-tabs {
+  display: flex;
+  gap: 0.4rem;
+  padding: 1.25rem 1.5rem 0;
+}
+.tab-btn {
+  background: rgba(255,255,255,0.35);
+  border: 1px solid var(--line);
+  border-bottom: none;
+  border-radius: 6px 6px 0 0;
+  padding: 0.55rem 1.1rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.03em;
+  color: var(--ink-soft);
+  position: relative;
+  top: 1px;
+}
+.tab-btn.is-active {
+  background: var(--parchment);
+  color: var(--ink);
+  font-weight: 600;
+  border-color: var(--line);
+  box-shadow: 0 -2px 0 var(--ochre-deep) inset;
+}
+.tab-btn:not(.is-active):hover {
+  color: var(--ink);
+}
+.tab-panel {
+  border-top: 1px solid var(--line);
+  padding-top: 0.25rem;
+}
+
+/* ============================================================
    JOURNAL DE RESSENTI
    ============================================================ */
 .journal-section {
