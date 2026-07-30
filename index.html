@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Carnet de Voyage — Neuf mois à deux</title>
+<meta name="description" content="Carnet de bord pour préparer l'arrivée de bébé, à deux, synchronisé sur tous vos appareils.">
+<meta name="theme-color" content="#1B2A4A">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="icon" href="icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="paper-texture" aria-hidden="true"></div>
+
+<div class="app" id="app">
+
+  <header class="hero">
+    <div class="hero-inner">
+      <p class="eyebrow">Carnet de voyage</p>
+      <h1>Neuf mois, une expédition à deux</h1>
+      <p class="subtitle">Chaque étape franchie mérite son tampon.</p>
+
+      <!-- Écran de configuration initiale -->
+      <div class="setup-panel" id="setupPanel">
+        <label for="dueDateInput">Date de terme prévue</label>
+        <div class="setup-row">
+          <input type="date" id="dueDateInput" />
+        </div>
+        <label for="setupFamilyCode" style="margin-top:0.9rem;">Code du voyage (le même sur les deux téléphones)</label>
+        <div class="setup-row">
+          <input type="text" id="setupFamilyCode" placeholder="ex : dupont-mars-2027" maxlength="40" />
+        </div>
+        <button id="startTripBtn" class="btn-primary" style="width:100%; margin-top:0.9rem;">Démarrer le voyage</button>
+        <p class="setup-hint">On calcule votre semaine de grossesse et on prépare l'itinéraire. Le code relie vos deux appareils : utilisez exactement le même des deux côtés.</p>
+      </div>
+
+      <!-- Résumé de progression + itinéraire -->
+      <div class="progress-summary" id="progressSummary" hidden>
+        <div class="week-badge">
+          <span class="week-number" id="weekNumber">—</span>
+          <span class="week-label">semaines</span>
+        </div>
+        <div class="route-wrap">
+          <svg viewBox="0 0 900 160" class="route-svg" id="routeSvg" preserveAspectRatio="xMidYMid meet">
+            <path id="routePath" d="M 20 110 C 160 20, 260 20, 320 90 S 500 160, 580 90 S 760 20, 880 90"
+                  fill="none" stroke="#C9BB99" stroke-width="3" stroke-dasharray="1 10" stroke-linecap="round"/>
+            <path id="routePathDone" d="M 20 110 C 160 20, 260 20, 320 90 S 500 160, 580 90 S 760 20, 880 90"
+                  fill="none" stroke="#1B2A4A" stroke-width="3" stroke-linecap="round"
+                  stroke-dasharray="0 2000" />
+            <g id="waypoints"></g>
+            <g id="travelerMarker" class="traveler-marker">
+              <circle r="9" class="traveler-dot"/>
+            </g>
+          </svg>
+        </div>
+        <button class="btn-ghost" id="editDueDateBtn">Modifier la date</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="sync-banner" id="syncBanner" hidden></div>
+
+  <main id="mainContent" hidden>
+
+    <div class="overall-progress">
+      <div class="overall-progress-track">
+        <div class="overall-progress-fill" id="overallProgressFill"></div>
+      </div>
+      <span class="overall-progress-label" id="overallProgressLabel">0 % préparé</span>
+    </div>
+
+    <section class="trimester-section" data-trimester="1">
+      <h2><span class="stage-eyebrow">Étape I</span> Premier trimestre <span class="week-range">SA 1 – 13</span></h2>
+      <ul class="checklist" id="checklist-1"></ul>
+    </section>
+
+    <section class="trimester-section" data-trimester="2">
+      <h2><span class="stage-eyebrow">Étape II</span> Deuxième trimestre <span class="week-range">SA 14 – 27</span></h2>
+      <ul class="checklist" id="checklist-2"></ul>
+    </section>
+
+    <section class="trimester-section" data-trimester="3">
+      <h2><span class="stage-eyebrow">Étape III</span> Troisième trimestre <span class="week-range">SA 28 – 40</span></h2>
+      <ul class="checklist" id="checklist-3"></ul>
+    </section>
+
+    <section class="trimester-section" data-trimester="4">
+      <h2><span class="stage-eyebrow">Arrivée</span> Après la naissance <span class="week-range">J0 – J30</span></h2>
+      <ul class="checklist" id="checklist-4"></ul>
+    </section>
+
+  </main>
+
+  <footer class="app-footer">
+    <p>Voyage partagé avec le code <code id="familyCodeDisplay">—</code></p>
+    <button class="btn-text" id="changeCodeBtn">Utiliser un autre code</button>
+  </footer>
+
+</div>
+
+<!-- Modale code famille -->
+<div class="modal-overlay" id="codeModal" hidden>
+  <div class="modal">
+    <h3>Code du voyage</h3>
+    <p>Ce code relie vos appareils : entrez le même sur votre téléphone et celui de votre femme pour partager le même carnet.</p>
+    <input type="text" id="familyCodeInput" placeholder="ex : dupont-mars-2027" maxlength="40" />
+    <div class="modal-actions">
+      <button class="btn-ghost" id="cancelCodeBtn">Annuler</button>
+      <button class="btn-primary" id="confirmCodeBtn">Valider</button>
+    </div>
+  </div>
+</div>
+
+<template id="checklistItemTemplate">
+  <li class="checklist-item">
+    <button class="check-btn" type="button" aria-pressed="false">
+      <span class="stamp" aria-hidden="true">FAIT</span>
+    </button>
+    <div class="item-text">
+      <p class="item-title"></p>
+      <p class="item-note"></p>
+    </div>
+  </li>
+</template>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

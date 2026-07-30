@@ -1,0 +1,480 @@
+/* ============================================================
+   TOKENS
+   ============================================================ */
+:root {
+  --parchment: #F4EBD5;
+  --parchment-deep: #E6D8B5;
+  --ink: #1B2A4A;
+  --ink-soft: #3A4D6E;
+  --ochre: #C89B3C;
+  --ochre-deep: #A87B24;
+  --sage: #6E8462;
+  --rust: #B5533C;
+  --line: rgba(27, 42, 74, 0.18);
+
+  --font-display: "Fraunces", "Iowan Old Style", serif;
+  --font-body: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  --radius: 4px;
+  --shadow-paper: 0 1px 2px rgba(27, 42, 74, 0.08), 0 6px 16px rgba(27, 42, 74, 0.06);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--parchment);
+  color: var(--ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  min-height: 100vh;
+  position: relative;
+}
+
+/* Subtle paper grain, no external image needed */
+.paper-texture {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.5;
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(27,42,74,0.04) 0, transparent 45%),
+    radial-gradient(circle at 80% 70%, rgba(27,42,74,0.03) 0, transparent 50%);
+}
+
+.app {
+  position: relative;
+  z-index: 1;
+  max-width: 760px;
+  margin: 0 auto;
+  padding-bottom: 4rem;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* ============================================================
+   HERO / ITINÉRAIRE
+   ============================================================ */
+.hero {
+  padding: 3rem 1.5rem 2rem;
+  text-align: center;
+  border-bottom: 1px solid var(--line);
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ochre-deep);
+  margin: 0 0 0.75rem;
+}
+
+.hero h1 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(1.7rem, 5vw, 2.6rem);
+  line-height: 1.15;
+  margin: 0 0 0.5rem;
+  letter-spacing: -0.01em;
+}
+
+.subtitle {
+  font-style: italic;
+  font-family: var(--font-display);
+  font-weight: 400;
+  color: var(--ink-soft);
+  margin: 0 0 1.75rem;
+  font-size: 1.05rem;
+}
+
+/* Setup panel */
+.setup-panel {
+  max-width: 380px;
+  margin: 0 auto;
+  background: rgba(255,255,255,0.35);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1.25rem 1.5rem 1.5rem;
+}
+
+.setup-panel label {
+  display: block;
+  font-size: 0.85rem;
+  text-align: left;
+  margin-bottom: 0.4rem;
+  color: var(--ink-soft);
+}
+
+.setup-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+input[type="date"], input[type="text"] {
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+  color: var(--ink);
+  flex: 1;
+  min-width: 0;
+}
+
+.setup-hint {
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  margin: 0.75rem 0 0;
+  text-align: left;
+}
+
+.btn-primary {
+  background: var(--ink);
+  color: var(--parchment);
+  border: none;
+  padding: 0.6rem 1.1rem;
+  border-radius: var(--radius);
+  font-weight: 500;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+.btn-primary:hover { background: var(--ink-soft); }
+.btn-primary:active { transform: scale(0.97); }
+
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--ink-soft);
+  padding: 0.45rem 0.9rem;
+  border-radius: var(--radius);
+  font-size: 0.82rem;
+}
+.btn-ghost:hover { border-color: var(--ink); color: var(--ink); }
+
+.btn-text {
+  background: none;
+  border: none;
+  color: var(--ink-soft);
+  text-decoration: underline;
+  font-size: 0.82rem;
+  padding: 0;
+}
+
+/* Progress + route */
+.progress-summary {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.week-badge {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  font-family: var(--font-mono);
+}
+.week-number {
+  font-size: 2rem;
+  font-weight: 500;
+  color: var(--ink);
+}
+.week-label {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.route-wrap {
+  width: 100%;
+  max-width: 620px;
+}
+.route-svg { width: 100%; height: auto; display: block; }
+
+.traveler-marker .traveler-dot {
+  fill: var(--rust);
+  stroke: var(--parchment);
+  stroke-width: 2;
+  transition: transform 0.4s ease;
+}
+
+.waypoint-dot {
+  stroke: var(--parchment);
+  stroke-width: 2;
+}
+.waypoint-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  fill: var(--ink-soft);
+  text-anchor: middle;
+}
+
+/* ============================================================
+   SYNC BANNER
+   ============================================================ */
+.sync-banner {
+  margin: 1rem 1.5rem 0;
+  padding: 0.6rem 0.9rem;
+  background: rgba(181, 83, 60, 0.1);
+  border: 1px solid rgba(181, 83, 60, 0.35);
+  color: var(--rust);
+  font-size: 0.82rem;
+  border-radius: var(--radius);
+  text-align: center;
+}
+
+/* ============================================================
+   OVERALL PROGRESS
+   ============================================================ */
+.overall-progress {
+  padding: 1.5rem 1.5rem 0.5rem;
+}
+.overall-progress-track {
+  height: 6px;
+  background: var(--parchment-deep);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.overall-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--sage), var(--ochre));
+  transition: width 0.5s ease;
+}
+.overall-progress-label {
+  display: block;
+  margin-top: 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  text-align: right;
+}
+
+/* ============================================================
+   TRIMESTER SECTIONS
+   ============================================================ */
+.trimester-section {
+  padding: 1.75rem 1.5rem 0.5rem;
+}
+
+.trimester-section h2 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 1.3rem;
+  margin: 0 0 1rem;
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 0.6rem;
+}
+
+.stage-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ochre-deep);
+  background: rgba(200, 155, 60, 0.12);
+  padding: 0.15rem 0.5rem;
+  border-radius: 2px;
+}
+
+.week-range {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  font-weight: 400;
+  margin-left: auto;
+}
+
+.checklist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.checklist-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
+  background: rgba(255,255,255,0.4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 0.85rem 1rem;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.checklist-item.is-done {
+  background: rgba(110, 132, 98, 0.08);
+  border-color: rgba(110, 132, 98, 0.3);
+}
+
+.item-text { flex: 1; min-width: 0; }
+
+.item-title {
+  margin: 0;
+  font-weight: 500;
+  font-size: 0.95rem;
+  line-height: 1.35;
+}
+.is-done .item-title {
+  color: var(--sage);
+}
+
+.item-note {
+  margin: 0.2rem 0 0;
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  line-height: 1.4;
+}
+
+/* Stamp check button */
+.check-btn {
+  position: relative;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2px solid var(--line);
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+}
+
+.check-btn .stamp {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.6rem;
+  letter-spacing: 0.05em;
+  color: var(--rust);
+  border: 2px solid var(--rust);
+  border-radius: 4px;
+  padding: 2px 4px;
+  transform: scale(0) rotate(-18deg);
+  opacity: 0;
+  transition: none;
+  white-space: nowrap;
+}
+
+.check-btn[aria-pressed="true"] .stamp {
+  opacity: 1;
+  transform: scale(1) rotate(-18deg);
+}
+
+.check-btn.is-stamping .stamp {
+  animation: stampDown 0.38s cubic-bezier(.36,1.7,.5,1) forwards;
+}
+
+@keyframes stampDown {
+  0%   { transform: scale(2.4) rotate(-18deg); opacity: 0; }
+  55%  { transform: scale(0.85) rotate(-18deg); opacity: 1; }
+  75%  { transform: scale(1.12) rotate(-18deg); }
+  100% { transform: scale(1) rotate(-18deg); opacity: 1; }
+}
+
+.check-btn:not([aria-pressed="true"]):hover {
+  border-color: var(--ink-soft);
+}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+.app-footer {
+  margin-top: 2.5rem;
+  padding: 1.5rem;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  border-top: 1px solid var(--line);
+}
+.app-footer code {
+  font-family: var(--font-mono);
+  background: rgba(27,42,74,0.06);
+  padding: 0.1rem 0.4rem;
+  border-radius: 3px;
+}
+
+/* ============================================================
+   MODAL
+   ============================================================ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(27, 42, 74, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  padding: 1rem;
+}
+.modal {
+  background: var(--parchment);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  max-width: 420px;
+  width: 100%;
+  box-shadow: var(--shadow-paper);
+}
+.modal h3 {
+  font-family: var(--font-display);
+  margin: 0 0 0.5rem;
+}
+.modal p {
+  font-size: 0.88rem;
+  color: var(--ink-soft);
+  margin: 0 0 1rem;
+  line-height: 1.5;
+}
+.modal input {
+  width: 100%;
+  margin-bottom: 1rem;
+}
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+}
+
+/* ============================================================
+   ACCESSIBILITY / MOTION
+   ============================================================ */
+:focus-visible {
+  outline: 2px solid var(--ochre-deep);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .check-btn.is-stamping .stamp { animation: none; }
+  .traveler-marker .traveler-dot { transition: none; }
+  .overall-progress-fill { transition: none; }
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 480px) {
+  .hero { padding: 2.25rem 1.25rem 1.5rem; }
+  .setup-row { flex-direction: column; }
+  .trimester-section { padding: 1.5rem 1.25rem 0.25rem; }
+  .week-range { margin-left: 0; }
+}
