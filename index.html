@@ -75,6 +75,19 @@
       <span class="overall-progress-label" id="overallProgressLabel">0 % préparé</span>
     </div>
 
+    <section class="postcard" id="postcardSection">
+      <div class="postcard-inner">
+        <div class="postcard-icon" id="postcardIcon"></div>
+        <div class="postcard-text">
+          <p class="postcard-eyebrow">Carte postale — <span id="postcardWeekLabel">semaine —</span></p>
+          <p class="postcard-size">Bébé fait à peu près la taille de <strong id="postcardSizeName">—</strong></p>
+          <p class="postcard-note" id="postcardNote"></p>
+        </div>
+        <div class="postcard-stamp" id="postcardStamp"></div>
+      </div>
+    </section>
+
+
     <section class="trimester-section" data-trimester="1">
       <h2><span class="stage-eyebrow">Étape I</span> Premier trimestre <span class="week-range">SA 1 – 13</span></h2>
       <ul class="checklist" id="checklist-1"></ul>
@@ -134,6 +147,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
 <script src="data.js"></script>
+<script src="weekly-data.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

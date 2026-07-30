@@ -25,7 +25,6 @@
   let db = null;
   let docRef = null;
   let unsubscribe = null;
-  let suppressNextRemoteEcho = false;
 
   // ----------------------------------------------------------
   // Firebase (optionnel) : si non configuré, on reste en local
@@ -38,6 +37,11 @@
     try {
       firebase.initializeApp(FIREBASE_CONFIG);
       db = firebase.firestore();
+      db.enablePersistence().catch((err) => {
+        // "failed-precondition" = plusieurs onglets ouverts, "unimplemented" = navigateur non compatible.
+        // Dans ces cas, l'appli continue de fonctionner, juste sans ce filet de sécurité hors-ligne.
+        console.warn("Persistance hors-ligne non activée :", err.code);
+      });
       return true;
     } catch (e) {
       console.error("Erreur d'initialisation Firebase :", e);
@@ -81,7 +85,6 @@
           return;
         }
         const data = snap.data();
-        suppressNextRemoteEcho = true;
         if (data.dueDate && data.dueDate !== state.dueDate) {
           state.dueDate = data.dueDate;
           localStorage.setItem(DUE_KEY, state.dueDate);
@@ -103,10 +106,6 @@
 
   function pushToCloud() {
     if (!docRef) return;
-    if (suppressNextRemoteEcho) {
-      suppressNextRemoteEcho = false;
-      return;
-    }
     docRef.set(
       {
         dueDate: state.dueDate,
@@ -350,7 +349,79 @@
     renderRoute();
     renderChecklists();
     renderProgress();
+    renderPostcard();
     familyCodeDisplay.textContent = state.familyCode || "—";
+  }
+
+  // ----------------------------------------------------------
+  // Carte postale de la semaine
+  // ----------------------------------------------------------
+  function produceIconSVG(shape, color, scale) {
+    const c = `var(--${color})`;
+    const s = Math.max(1, Math.min(10, scale));
+    const r = 10 + s * 3.2; // rayon/half-size en fonction de l'échelle
+    const cx = 50, cy = 56;
+
+    const stem = `<path d="M ${cx - 3} ${cy - r + 4} Q ${cx} ${cy - r - 10} ${cx + 7} ${cy - r - 6}" fill="none" stroke="var(--sage)" stroke-width="3" stroke-linecap="round"/>`;
+
+    let body = "";
+    switch (shape) {
+      case "seed":
+        body = `<circle cx="${cx}" cy="${cy}" r="${Math.max(3, r * 0.35)}" fill="${c}"/>`;
+        return `<svg viewBox="0 0 100 100">${body}</svg>`;
+      case "berry":
+        body = `
+          <circle cx="${cx - r * 0.4}" cy="${cy + r * 0.3}" r="${r * 0.55}" fill="${c}"/>
+          <circle cx="${cx + r * 0.45}" cy="${cy + r * 0.15}" r="${r * 0.5}" fill="${c}"/>
+          <circle cx="${cx}" cy="${cy - r * 0.45}" r="${r * 0.5}" fill="${c}"/>`;
+        return `<svg viewBox="0 0 100 100">${body}${stem}</svg>`;
+      case "round-small":
+      case "round-medium":
+        body = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${c}"/>`;
+        return `<svg viewBox="0 0 100 100">${body}${stem}</svg>`;
+      case "oval":
+        body = `<ellipse cx="${cx}" cy="${cy}" rx="${r * 0.8}" ry="${r * 1.05}" fill="${c}"/>`;
+        return `<svg viewBox="0 0 100 100">${body}${stem}</svg>`;
+      case "elongated":
+        body = `<rect x="${cx - r}" y="${cy - r * 0.5}" width="${r * 2}" height="${r}" rx="${r * 0.5}" fill="${c}" transform="rotate(-18 ${cx} ${cy})"/>`;
+        return `<svg viewBox="0 0 100 100">${body}</svg>`;
+      case "leafy": {
+        const leaf1 = `<ellipse cx="${cx - r * 0.5}" cy="${cy - r * 0.7}" rx="${r * 0.45}" ry="${r * 0.3}" fill="var(--sage)" transform="rotate(-30 ${cx - r * 0.5} ${cy - r * 0.7})"/>`;
+        const leaf2 = `<ellipse cx="${cx + r * 0.5}" cy="${cy - r * 0.7}" rx="${r * 0.45}" ry="${r * 0.3}" fill="var(--sage)" transform="rotate(30 ${cx + r * 0.5} ${cy - r * 0.7})"/>`;
+        body = `<circle cx="${cx}" cy="${cy + r * 0.1}" r="${r * 0.85}" fill="${c}"/>`;
+        return `<svg viewBox="0 0 100 100">${leaf1}${leaf2}${body}</svg>`;
+      }
+      case "large-round": {
+        const lines = [-0.5, 0, 0.5].map(
+          (o) => `<path d="M ${cx + o * r * 0.6} ${cy - r * 0.9} Q ${cx + o * r * 1.1} ${cy} ${cx + o * r * 0.6} ${cy + r * 0.9}" fill="none" stroke="rgba(27,42,74,0.18)" stroke-width="2"/>`
+        ).join("");
+        body = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${c}"/>${lines}`;
+        return `<svg viewBox="0 0 100 100">${body}${stem}</svg>`;
+      }
+      case "large-oval": {
+        const lines = [-0.5, 0, 0.5].map(
+          (o) => `<path d="M ${cx + o * r * 0.7} ${cy - r} Q ${cx + o * r * 1.2} ${cy} ${cx + o * r * 0.7} ${cy + r}" fill="none" stroke="rgba(27,42,74,0.18)" stroke-width="2"/>`
+        ).join("");
+        body = `<ellipse cx="${cx}" cy="${cy}" rx="${r}" ry="${r * 0.8}" fill="${c}"/>${lines}`;
+        return `<svg viewBox="0 0 100 100">${body}</svg>`;
+      }
+      default:
+        body = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${c}"/>`;
+        return `<svg viewBox="0 0 100 100">${body}</svg>`;
+    }
+  }
+
+  function renderPostcard() {
+    const week = currentWeek();
+    if (week === null) return;
+    const entry = WEEKLY_DATA[Math.max(4, Math.min(40, week))];
+    if (!entry) return;
+
+    el("postcardWeekLabel").textContent = "semaine " + week;
+    el("postcardSizeName").textContent = entry.name;
+    el("postcardNote").textContent = entry.text;
+    el("postcardIcon").innerHTML = produceIconSVG(entry.shape, entry.color, entry.scale);
+    el("postcardStamp").textContent = "SA " + week;
   }
 
   // ----------------------------------------------------------

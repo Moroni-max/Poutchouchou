@@ -457,6 +457,96 @@ input[type="date"], input[type="text"] {
   justify-content: flex-end;
   gap: 0.5rem;
 }
+
+/* ============================================================
+   CARTE POSTALE DE LA SEMAINE
+   ============================================================ */
+.postcard {
+  margin: 0 1.5rem 1.75rem;
+  background: #FBF6E8;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  box-shadow: var(--shadow-paper);
+  position: relative;
+}
+.postcard::before {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border: 1px dashed rgba(27,42,74,0.22);
+  border-radius: 3px;
+  pointer-events: none;
+}
+
+.postcard-inner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1.5rem 1.6rem;
+}
+
+.postcard-icon {
+  flex-shrink: 0;
+  width: 84px;
+  height: 84px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.postcard-icon svg { width: 100%; height: 100%; }
+
+.postcard-text { flex: 1; min-width: 0; }
+
+.postcard-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ochre-deep);
+  margin: 0 0 0.35rem;
+}
+
+.postcard-size {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  margin: 0 0 0.45rem;
+  line-height: 1.3;
+}
+.postcard-size strong { font-weight: 600; }
+
+.postcard-note {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.postcard-stamp {
+  flex-shrink: 0;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 2px dashed var(--rust);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--rust);
+  transform: rotate(-8deg);
+  text-align: center;
+  line-height: 1.15;
+}
+
+@media (max-width: 480px) {
+  .postcard { margin: 0 1.25rem 1.5rem; }
+  .postcard-inner { flex-wrap: wrap; padding: 1.25rem; }
+  .postcard-stamp { position: absolute; top: 1rem; right: 1rem; }
+  .postcard-icon { width: 64px; height: 64px; }
+}
+
 .app-footer {
   margin-top: 2.5rem;
   padding: 1.5rem;
