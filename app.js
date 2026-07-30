@@ -5,7 +5,18 @@
   const CODE_KEY = "cdv_familyCode";
   const CUSTOM_KEY = "cdv_customItems";
   const HIDDEN_KEY = "cdv_hiddenBase";
+  const JOURNAL_KEY = "cdv_journal";
+  const JOURNAL_AUTHOR_KEY = "cdv_journalAuthor";
   const WEEKS_TOTAL = 40;
+
+  const MOOD_OPTIONS = [
+    { id: "heureux",  emoji: "😊", label: "Heureux·se" },
+    { id: "fatigue",  emoji: "😴", label: "Fatigué·e" },
+    { id: "nauseeux", emoji: "🤢", label: "Nauséeux·se" },
+    { id: "attendri", emoji: "🥰", label: "Attendri·e" },
+    { id: "stresse",  emoji: "😰", label: "Stressé·e" },
+    { id: "excite",   emoji: "🤩", label: "Excité·e" }
+  ];
 
   const el = (id) => document.getElementById(id);
   const setupPanel = el("setupPanel");
@@ -19,7 +30,8 @@
     familyCode: localStorage.getItem(CODE_KEY) || null,
     completed: {}, // { itemId: true }
     customItems: JSON.parse(localStorage.getItem(CUSTOM_KEY) || "[]"), // [{id, trimester, title, note}]
-    hiddenBaseIds: JSON.parse(localStorage.getItem(HIDDEN_KEY) || "[]") // ids d'étapes prédéfinies supprimées
+    hiddenBaseIds: JSON.parse(localStorage.getItem(HIDDEN_KEY) || "[]"), // ids d'étapes prédéfinies supprimées
+    journalEntries: JSON.parse(localStorage.getItem(JOURNAL_KEY) || "[]") // [{id, date, author, mood, text}]
   };
 
   let db = null;
@@ -80,6 +92,7 @@
             completed: state.completed,
             customItems: state.customItems,
             hiddenBaseIds: state.hiddenBaseIds,
+            journalEntries: state.journalEntries,
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
           });
           return;
@@ -92,8 +105,10 @@
         state.completed = data.completed || {};
         state.customItems = data.customItems || [];
         state.hiddenBaseIds = data.hiddenBaseIds || [];
+        state.journalEntries = data.journalEntries || [];
         localStorage.setItem(CUSTOM_KEY, JSON.stringify(state.customItems));
         localStorage.setItem(HIDDEN_KEY, JSON.stringify(state.hiddenBaseIds));
+        localStorage.setItem(JOURNAL_KEY, JSON.stringify(state.journalEntries));
         renderAll();
         hideBanner();
       },
@@ -112,6 +127,7 @@
         completed: state.completed,
         customItems: state.customItems,
         hiddenBaseIds: state.hiddenBaseIds,
+        journalEntries: state.journalEntries,
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
       },
       { merge: true }
@@ -345,11 +361,130 @@
     el("overallProgressLabel").textContent = pct + " % préparé";
   }
 
+  // ----------------------------------------------------------
+  // Journal de ressenti
+  // ----------------------------------------------------------
+  let selectedAuthor = localStorage.getItem(JOURNAL_AUTHOR_KEY) || null;
+  let selectedMood = null;
+
+  function setupJournalForm() {
+    const moodRow = el("journalMoodRow");
+    MOOD_OPTIONS.forEach((mood) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "mood-btn";
+      btn.setAttribute("aria-pressed", "false");
+      btn.title = mood.label;
+      btn.textContent = mood.emoji;
+      btn.dataset.moodId = mood.id;
+      btn.addEventListener("click", () => {
+        const alreadySelected = btn.getAttribute("aria-pressed") === "true";
+        moodRow.querySelectorAll(".mood-btn").forEach((b) => b.setAttribute("aria-pressed", "false"));
+        selectedMood = alreadySelected ? null : mood.id;
+        if (!alreadySelected) btn.setAttribute("aria-pressed", "true");
+      });
+      moodRow.appendChild(btn);
+    });
+
+    const authorToggle = el("journalAuthorToggle");
+    authorToggle.querySelectorAll(".author-btn").forEach((btn) => {
+      if (btn.dataset.author === selectedAuthor) btn.setAttribute("aria-pressed", "true");
+      btn.addEventListener("click", () => {
+        authorToggle.querySelectorAll(".author-btn").forEach((b) => b.setAttribute("aria-pressed", "false"));
+        btn.setAttribute("aria-pressed", "true");
+        selectedAuthor = btn.dataset.author;
+        localStorage.setItem(JOURNAL_AUTHOR_KEY, selectedAuthor);
+      });
+    });
+
+    el("journalSubmitBtn").addEventListener("click", () => {
+      const textarea = el("journalText");
+      const text = textarea.value.trim();
+      if (!text) {
+        textarea.focus();
+        return;
+      }
+      if (!selectedAuthor) {
+        alert("Merci d'indiquer qui écrit cette note.");
+        return;
+      }
+      addJournalEntry(selectedAuthor, selectedMood, text);
+      textarea.value = "";
+      selectedMood = null;
+      moodRow.querySelectorAll(".mood-btn").forEach((b) => b.setAttribute("aria-pressed", "false"));
+    });
+  }
+
+  function saveJournalEntries() {
+    localStorage.setItem(JOURNAL_KEY, JSON.stringify(state.journalEntries));
+  }
+
+  function addJournalEntry(author, moodId, text) {
+    const entry = {
+      id: "journal-" + Date.now() + "-" + Math.random().toString(36).slice(2, 7),
+      date: new Date().toISOString(),
+      author,
+      mood: moodId,
+      text
+    };
+    state.journalEntries.unshift(entry);
+    saveJournalEntries();
+    renderJournal();
+    pushToCloud();
+  }
+
+  function deleteJournalEntry(id) {
+    state.journalEntries = state.journalEntries.filter((e) => e.id !== id);
+    saveJournalEntries();
+    renderJournal();
+    pushToCloud();
+  }
+
+  function formatJournalDate(iso) {
+    const d = new Date(iso);
+    return d.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+  }
+
+  function renderJournal() {
+    const list = el("journalList");
+    list.innerHTML = "";
+
+    if (!state.journalEntries.length) {
+      const empty = document.createElement("li");
+      empty.className = "journal-empty";
+      empty.textContent = "Aucune note pour l'instant — le premier ressenti du jour vous attend.";
+      list.appendChild(empty);
+      return;
+    }
+
+    const sorted = state.journalEntries.slice().sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    sorted.forEach((entry) => {
+      const tpl = el("journalEntryTemplate").content.cloneNode(true);
+      const authorEl = tpl.querySelector(".journal-entry-author");
+      const moodEl = tpl.querySelector(".journal-entry-mood");
+      const dateEl = tpl.querySelector(".journal-entry-date");
+      const textEl = tpl.querySelector(".journal-entry-text");
+      const deleteBtn = tpl.querySelector(".journal-entry-delete");
+
+      authorEl.textContent = entry.author === "papa" ? "Papa" : "Maman";
+      const moodDef = MOOD_OPTIONS.find((m) => m.id === entry.mood);
+      moodEl.textContent = moodDef ? moodDef.emoji : "";
+      moodEl.title = moodDef ? moodDef.label : "";
+      dateEl.textContent = formatJournalDate(entry.date);
+      textEl.textContent = entry.text;
+      deleteBtn.addEventListener("click", () => deleteJournalEntry(entry.id));
+
+      list.appendChild(tpl);
+    });
+  }
+
   function renderAll() {
     renderRoute();
     renderChecklists();
     renderProgress();
     renderPostcard();
+    renderJournal();
     familyCodeDisplay.textContent = state.familyCode || "—";
   }
 
@@ -479,6 +614,7 @@
   // ----------------------------------------------------------
   // Init
   // ----------------------------------------------------------
+  setupJournalForm();
   const firebaseReady = initFirebase();
 
   if (state.dueDate && state.familyCode) {

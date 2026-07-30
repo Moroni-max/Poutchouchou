@@ -108,6 +108,28 @@
       <ul class="checklist" id="checklist-4"></ul>
     </section>
 
+    <section class="journal-section">
+      <h2><span class="stage-eyebrow">Carnet</span> Journal de ressenti</h2>
+
+      <div class="journal-form">
+        <div class="journal-row-labels">
+          <span>Qui écrit ?</span>
+          <span>Comment ça va ?</span>
+        </div>
+        <div class="journal-controls">
+          <div class="journal-author-toggle" id="journalAuthorToggle" role="group" aria-label="Auteur de la note">
+            <button type="button" class="author-btn" data-author="maman">Maman</button>
+            <button type="button" class="author-btn" data-author="papa">Papa</button>
+          </div>
+          <div class="journal-mood-row" id="journalMoodRow"></div>
+        </div>
+        <textarea id="journalText" placeholder="Un ressenti, un symptôme, une envie, un moment à garder..." maxlength="600" rows="3"></textarea>
+        <button type="button" class="btn-primary" id="journalSubmitBtn">Ajouter au journal</button>
+      </div>
+
+      <ul class="journal-list" id="journalList"></ul>
+    </section>
+
   </main>
 
   <footer class="app-footer" id="appFooter" hidden>
@@ -143,7 +165,17 @@
   </li>
 </template>
 
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<template id="journalEntryTemplate">
+  <li class="journal-entry">
+    <div class="journal-entry-header">
+      <span class="journal-entry-author"></span>
+      <span class="journal-entry-mood"></span>
+      <span class="journal-entry-date"></span>
+      <button class="delete-btn journal-entry-delete" type="button" title="Supprimer cette note">&times;</button>
+    </div>
+    <p class="journal-entry-text"></p>
+  </li>
+</template>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
 <script src="data.js"></script>
