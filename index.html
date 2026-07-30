@@ -71,6 +71,7 @@
     <nav class="app-tabs" id="appTabs" role="tablist" aria-label="Sections du carnet">
       <button type="button" class="tab-btn is-active" data-tab="accueil" role="tab" aria-selected="true">Accueil</button>
       <button type="button" class="tab-btn" data-tab="journal" role="tab" aria-selected="false">Journal</button>
+      <button type="button" class="tab-btn" data-tab="nutrition" role="tab" aria-selected="false">Nutrition</button>
     </nav>
 
     <div class="tab-panel" data-tab-panel="accueil">
@@ -139,6 +140,40 @@
 
         <ul class="journal-list" id="journalList"></ul>
       </section>
+
+    </div>
+
+    <div class="tab-panel" data-tab-panel="nutrition" hidden>
+
+      <section class="nutrition-section">
+        <h2><span class="stage-eyebrow nutrition-eyebrow-rust">À éviter</span></h2>
+        <ul class="nutrition-list nutrition-list-rust">
+          <li><strong>Fromages au lait cru et pâtes molles</strong> (croûte fleurie, persillés) <span>— risque de listériose</span></li>
+          <li><strong>Charcuterie non cuite</strong> (rillettes, pâté, jambon cru, saucisson) <span>— sauf bien cuite à cœur</span></li>
+          <li><strong>Poisson et viande crus ou fumés</strong> (sushis, tartare, carpaccio, saumon fumé) <span>— risque de listériose et toxoplasmose</span></li>
+          <li><strong>Coquillages et crustacés crus</strong> <span>— risque infectieux</span></li>
+          <li><strong>Poissons prédateurs</strong> (espadon, thon rouge, requin) <span>— à limiter fortement, riches en mercure</span></li>
+          <li><strong>Alcool</strong> <span>— à éviter complètement, à tout moment de la grossesse</span></li>
+          <li><strong>Foie et dérivés</strong> (pâté de foie, foie gras) <span>— à limiter, trop riches en vitamine A</span></li>
+          <li><strong>Œufs crus ou peu cuits</strong> (mayonnaise maison, pâte à gâteau crue) <span>— risque de salmonellose</span></li>
+          <li><strong>Excès de caféine</strong> (café, thé, boissons énergisantes) <span>— à limiter à 2 tasses par jour environ</span></li>
+        </ul>
+      </section>
+
+      <section class="nutrition-section">
+        <h2><span class="stage-eyebrow nutrition-eyebrow-sage">À privilégier</span></h2>
+        <ul class="nutrition-list nutrition-list-sage">
+          <li><strong>Fer</strong> <span>— viande rouge bien cuite, légumineuses, légumes verts à feuilles</span></li>
+          <li><strong>Calcium</strong> <span>— produits laitiers pasteurisés, légumes verts, certaines eaux minérales</span></li>
+          <li><strong>Oméga-3</strong> <span>— poissons gras bien cuits (saumon, maquereau, sardine), 2 fois par semaine environ</span></li>
+          <li><strong>Folates (vitamine B9)</strong> <span>— légumes verts, légumineuses, agrumes — particulièrement important en début de grossesse</span></li>
+          <li><strong>Vitamine D</strong> <span>— exposition modérée au soleil, poissons gras ; souvent complétée sur prescription</span></li>
+          <li><strong>Fibres</strong> <span>— fruits, légumes, céréales complètes — utiles contre le transit ralenti</span></li>
+          <li><strong>Hydratation</strong> <span>— de l'eau régulièrement tout au long de la journée</span></li>
+        </ul>
+      </section>
+
+      <p class="nutrition-disclaimer">Repères généraux et non exhaustifs — ils ne remplacent pas l'avis de votre sage-femme, gynécologue ou médecin, qui reste la référence pour toute question personnalisée.</p>
 
     </div>
 

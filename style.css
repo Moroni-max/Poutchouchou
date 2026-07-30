@@ -459,6 +459,67 @@ input[type="date"], input[type="text"] {
 }
 
 /* ============================================================
+   GUIDE NUTRITIONNEL
+   ============================================================ */
+.nutrition-section {
+  padding: 1.75rem 1.5rem 0.5rem;
+}
+.nutrition-section h2 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 1.2rem;
+  margin: 0 0 1rem;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 0.6rem;
+}
+.nutrition-eyebrow-rust {
+  color: var(--rust);
+  background: rgba(181,83,60,0.1);
+}
+.nutrition-eyebrow-sage {
+  color: var(--sage);
+  background: rgba(110,132,98,0.12);
+}
+
+.nutrition-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+.nutrition-list li {
+  background: rgba(255,255,255,0.4);
+  border: 1px solid var(--line);
+  border-left-width: 3px;
+  border-radius: var(--radius);
+  padding: 0.7rem 0.9rem;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+.nutrition-list li strong {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.15rem;
+}
+.nutrition-list li span {
+  color: var(--ink-soft);
+  font-size: 0.82rem;
+}
+.nutrition-list-rust li { border-left-color: var(--rust); }
+.nutrition-list-sage li { border-left-color: var(--sage); }
+
+.nutrition-disclaimer {
+  margin: 1.5rem 1.5rem 0.5rem;
+  padding: 0.8rem 1rem;
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  font-style: italic;
+  border-top: 1px dashed var(--line);
+}
+
+/* ============================================================
    ONGLETS
    ============================================================ */
 .app-tabs {
