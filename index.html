@@ -72,6 +72,7 @@
       <button type="button" class="tab-btn is-active" data-tab="accueil" role="tab" aria-selected="true">Accueil</button>
       <button type="button" class="tab-btn" data-tab="journal" role="tab" aria-selected="false">Journal</button>
       <button type="button" class="tab-btn" data-tab="nutrition" role="tab" aria-selected="false">Nutrition</button>
+      <button type="button" class="tab-btn" data-tab="conges" role="tab" aria-selected="false">Congés</button>
     </nav>
 
     <div class="tab-panel" data-tab-panel="accueil">
@@ -177,6 +178,72 @@
 
     </div>
 
+    <div class="tab-panel" data-tab-panel="conges" hidden>
+
+      <section class="conges-section">
+        <h2><span class="stage-eyebrow">Simulateur</span> Congé maternité</h2>
+        <div class="conges-form">
+          <label>Salaire brut mensuel moyen (3 derniers mois)
+            <input type="number" id="matSalaire" min="0" step="10" placeholder="ex : 2500" />
+          </label>
+          <label>Situation
+            <select id="matDuree">
+              <option value="16">1er ou 2e enfant — 16 semaines</option>
+              <option value="26">3e enfant ou plus — 26 semaines</option>
+              <option value="34">Jumeaux — 34 semaines</option>
+              <option value="46">Triplés ou plus — 46 semaines</option>
+            </select>
+          </label>
+          <label class="conges-checkbox">
+            <input type="checkbox" id="matSubrogation" />
+            Mon employeur maintient mon salaire net habituel pendant le congé (subrogation)
+          </label>
+        </div>
+        <div class="conges-result" id="matResult" hidden></div>
+      </section>
+
+      <section class="conges-section">
+        <h2><span class="stage-eyebrow">Simulateur</span> Congé paternité</h2>
+        <div class="conges-form">
+          <label>Salaire brut mensuel moyen (3 derniers mois)
+            <input type="number" id="patSalaire" min="0" step="10" placeholder="ex : 2800" />
+          </label>
+          <label>Naissance
+            <select id="patType">
+              <option value="25">Naissance simple — 25 jours au total</option>
+              <option value="32">Naissances multiples — 32 jours au total</option>
+            </select>
+          </label>
+          <label class="conges-checkbox">
+            <input type="checkbox" id="patSubrogation" />
+            Mon employeur maintient mon salaire net habituel pendant le congé (subrogation)
+          </label>
+        </div>
+        <div class="conges-result" id="patResult" hidden></div>
+      </section>
+
+      <section class="conges-section">
+        <h2><span class="stage-eyebrow">Simulateur</span> Congé parental (PreParE)</h2>
+        <div class="conges-form">
+          <label>Niveau d'activité pendant le congé
+            <select id="parNiveau">
+              <option value="total">Arrêt total d'activité</option>
+              <option value="mi-temps">Temps partiel ≤ 50 %</option>
+              <option value="partiel">Temps partiel entre 50 % et 80 %</option>
+            </select>
+          </label>
+          <label class="conges-checkbox">
+            <input type="checkbox" id="parMajore" />
+            Nous avons déjà 3 enfants ou plus à charge (majoration possible en arrêt total)
+          </label>
+        </div>
+        <div class="conges-result" id="parResult" hidden></div>
+      </section>
+
+      <p class="nutrition-disclaimer">Estimations basées sur les montants et plafonds en vigueur au 1er janvier 2026 (ameli.fr, caf.fr) : plafond mensuel de la Sécurité sociale à 4 005 €, indemnité journalière maternité/paternité plafonnée à 104,02 €, PreParE à 459,70 €/mois à taux plein. Ces règles évoluent chaque année et certaines conditions d'éligibilité (durée de cotisation, trimestres validés...) ne sont pas prises en compte ici — vérifiez votre situation exacte auprès de votre employeur, de l'Assurance Maladie ou de la CAF.</p>
+
+    </div>
+
   </main>
 
   <footer class="app-footer" id="appFooter" hidden>
@@ -228,6 +295,7 @@
 <script src="firebase-config.js"></script>
 <script src="data.js"></script>
 <script src="weekly-data.js"></script>
+<script src="conges.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

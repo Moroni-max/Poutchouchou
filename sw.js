@@ -1,4 +1,4 @@
-const CACHE_NAME = "carnet-de-voyage-v3";
+const CACHE_NAME = "carnet-de-voyage-v4";
 const ASSETS = [
   "./",
   "./index.html",
@@ -6,6 +6,7 @@ const ASSETS = [
   "./app.js",
   "./data.js",
   "./weekly-data.js",
+  "./conges.js",
   "./firebase-config.js",
   "./manifest.json",
   "./icon.png"

@@ -459,6 +459,84 @@ input[type="date"], input[type="text"] {
 }
 
 /* ============================================================
+   SIMULATEUR DE CONGÉS
+   ============================================================ */
+.conges-section {
+  padding: 1.75rem 1.5rem 0.5rem;
+}
+.conges-section h2 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 1.2rem;
+  margin: 0 0 1rem;
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 0.6rem;
+}
+
+.conges-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  margin-bottom: 1rem;
+}
+.conges-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+.conges-form input[type="number"],
+.conges-form select {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+  color: var(--ink);
+}
+.conges-checkbox {
+  flex-direction: row !important;
+  align-items: center;
+  gap: 0.55rem !important;
+}
+.conges-checkbox input[type="checkbox"] {
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+}
+
+.conges-result {
+  background: rgba(200,155,60,0.08);
+  border: 1px solid rgba(200,155,60,0.3);
+  border-radius: var(--radius);
+  padding: 1rem 1.1rem;
+  margin-bottom: 0.5rem;
+}
+.conges-result-headline {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  margin: 0 0 0.5rem;
+}
+.conges-result-headline strong {
+  color: var(--ochre-deep);
+  font-weight: 600;
+}
+.conges-result-line {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  margin: 0.2rem 0;
+  line-height: 1.5;
+}
+.conges-result-line strong {
+  color: var(--ink);
+}
+
+/* ============================================================
    GUIDE NUTRITIONNEL
    ============================================================ */
 .nutrition-section {

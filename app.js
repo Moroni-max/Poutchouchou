@@ -619,6 +619,112 @@
   });
 
   // ----------------------------------------------------------
+  // Simulateur de congés
+  // ----------------------------------------------------------
+  function setupCongesSimulator() {
+    const matInputs = [el("matSalaire"), el("matDuree"), el("matSubrogation")];
+    const patInputs = [el("patSalaire"), el("patType"), el("patSubrogation")];
+    const parInputs = [el("parNiveau"), el("parMajore")];
+
+    matInputs.forEach((input) => input.addEventListener("input", renderMaternite));
+    patInputs.forEach((input) => input.addEventListener("input", renderPaternite));
+    parInputs.forEach((input) => input.addEventListener("input", renderParental));
+
+    renderParental(); // pas besoin de salaire, peut s'afficher tout de suite
+  }
+
+  function renderMaternite() {
+    const result = el("matResult");
+    const salaire = parseFloat(el("matSalaire").value);
+    if (!salaire || salaire <= 0) {
+      result.hidden = true;
+      return;
+    }
+    const semaines = parseInt(el("matDuree").value, 10);
+    const joursTotal = semaines * 7;
+    const subrogation = el("matSubrogation").checked;
+
+    const ij = calcIndemniteJournaliere(salaire);
+    const totalIJ = ij * joursTotal;
+    const moisApprox = semaines / 4.33;
+    const totalIJMensuel = totalIJ / moisApprox;
+    const netHabituel = estimerNetMensuel(salaire);
+
+    result.hidden = false;
+    if (subrogation) {
+      result.innerHTML = `
+        <p class="conges-result-headline">Salaire net maintenu : <strong>${formatEuros(netHabituel)}</strong> / mois</p>
+        <p class="conges-result-line">Votre employeur vous maintient votre salaire net habituel pendant les <strong>${semaines} semaines</strong> (${joursTotal} jours) de congé, puis se fait rembourser les indemnités journalières par la CPAM (~${formatEuros(ij)}/jour, soit environ ${formatEuros(totalIJ)} au total sur la période).</p>
+      `;
+    } else {
+      result.innerHTML = `
+        <p class="conges-result-headline">Indemnités CPAM estimées : <strong>${formatEuros(totalIJMensuel)}</strong> / mois</p>
+        <p class="conges-result-line">Soit environ <strong>${formatEuros(ij)}</strong> par jour, pour un total d'environ <strong>${formatEuros(totalIJ)}</strong> sur les ${semaines} semaines (${joursTotal} jours) de congé.</p>
+        <p class="conges-result-line">À titre de comparaison, votre salaire net habituel est estimé à environ ${formatEuros(netHabituel)} / mois — l'écart peut être réduit si votre convention collective prévoit un complément employeur.</p>
+      `;
+    }
+  }
+
+  function renderPaternite() {
+    const result = el("patResult");
+    const salaire = parseFloat(el("patSalaire").value);
+    if (!salaire || salaire <= 0) {
+      result.hidden = true;
+      return;
+    }
+    const joursTotal = parseInt(el("patType").value, 10);
+    const joursNaissance = CONGES_CONSTANTS.PATERNITE_JOURS_NAISSANCE;
+    const joursIndemnises = joursTotal - joursNaissance;
+    const subrogation = el("patSubrogation").checked;
+
+    const ij = calcIndemniteJournaliere(salaire);
+    const totalIJ = ij * joursIndemnises;
+    const netHabituel = estimerNetMensuel(salaire);
+    const netJournalier = netHabituel / 30;
+    const naissancePaye = netJournalier * joursNaissance;
+
+    result.hidden = false;
+    if (subrogation) {
+      result.innerHTML = `
+        <p class="conges-result-headline">Salaire net maintenu tout du long : <strong>~${formatEuros(netJournalier)}</strong> / jour</p>
+        <p class="conges-result-line">Les ${joursNaissance} premiers jours (congé de naissance) sont déjà payés à 100 % par l'employeur. Pour les ${joursIndemnises} jours suivants, votre employeur maintient votre net et se fait rembourser environ ${formatEuros(ij)}/jour par la CPAM (${formatEuros(totalIJ)} au total).</p>
+      `;
+    } else {
+      result.innerHTML = `
+        <p class="conges-result-headline">Indemnités CPAM estimées : <strong>${formatEuros(totalIJ)}</strong> au total</p>
+        <p class="conges-result-line">Les <strong>${joursNaissance} premiers jours</strong> (congé de naissance) sont payés à 100 % par l'employeur, soit environ ${formatEuros(naissancePaye)}.</p>
+        <p class="conges-result-line">Les <strong>${joursIndemnises} jours</strong> suivants de congé paternité sont indemnisés par la CPAM à environ <strong>${formatEuros(ij)}</strong>/jour, soit ${formatEuros(totalIJ)} au total — sur les ${joursTotal} jours de congé.</p>
+      `;
+    }
+  }
+
+  function renderParental() {
+    const result = el("parResult");
+    const niveau = el("parNiveau").value;
+    const majore = el("parMajore").checked;
+    const p = CONGES_CONSTANTS.PREPARE;
+
+    let montant, dureeNote;
+    if (niveau === "total") {
+      montant = majore ? p.totalMajore : p.total;
+      dureeNote = "Durée : 6 mois par parent pour un 1er enfant ; jusqu'aux 3 ans de l'enfant à partir du 2e (avec majoration si 3 enfants ou plus).";
+    } else if (niveau === "mi-temps") {
+      montant = p.miTemps;
+      dureeNote = "Montant réduit pour un temps partiel jusqu'à 50 % — la majoration ne s'applique qu'à l'arrêt total.";
+    } else {
+      montant = p.partiel;
+      dureeNote = "Montant réduit pour un temps partiel entre 50 % et 80 % — la majoration ne s'applique qu'à l'arrêt total.";
+    }
+
+    result.hidden = false;
+    result.innerHTML = `
+      <p class="conges-result-headline">PreParE estimée : <strong>${formatEuros(montant)}</strong> / mois</p>
+      <p class="conges-result-line">${dureeNote}</p>
+      <p class="conges-result-line">Versée par la CAF, sans lien avec votre salaire — les deux parents peuvent la percevoir en même temps, mais le total est alors plafonné au montant à taux plein.</p>
+    `;
+  }
+
+  // ----------------------------------------------------------
   // Onglets
   // ----------------------------------------------------------
   function setupTabs() {
@@ -642,6 +748,7 @@
   // ----------------------------------------------------------
   setupTabs();
   setupJournalForm();
+  setupCongesSimulator();
   const firebaseReady = initFirebase();
 
   if (state.dueDate && state.familyCode) {
