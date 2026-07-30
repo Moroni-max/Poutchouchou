@@ -7,6 +7,9 @@
   const HIDDEN_KEY = "cdv_hiddenBase";
   const JOURNAL_KEY = "cdv_journal";
   const JOURNAL_AUTHOR_KEY = "cdv_journalAuthor";
+  const BUDGET_CUSTOM_KEY = "cdv_budgetCustom";
+  const BUDGET_HIDDEN_KEY = "cdv_budgetHidden";
+  const BUDGET_VALUES_KEY = "cdv_budgetValues";
   const WEEKS_TOTAL = 40;
 
   const MOOD_OPTIONS = [
@@ -31,7 +34,10 @@
     completed: {}, // { itemId: true }
     customItems: JSON.parse(localStorage.getItem(CUSTOM_KEY) || "[]"), // [{id, trimester, title, note}]
     hiddenBaseIds: JSON.parse(localStorage.getItem(HIDDEN_KEY) || "[]"), // ids d'étapes prédéfinies supprimées
-    journalEntries: JSON.parse(localStorage.getItem(JOURNAL_KEY) || "[]") // [{id, date, author, mood, text}]
+    journalEntries: JSON.parse(localStorage.getItem(JOURNAL_KEY) || "[]"), // [{id, date, author, mood, text}]
+    budgetCustomItems: JSON.parse(localStorage.getItem(BUDGET_CUSTOM_KEY) || "[]"), // [{id, category, name, prevu}]
+    budgetHiddenIds: JSON.parse(localStorage.getItem(BUDGET_HIDDEN_KEY) || "[]"), // ids d'articles prédéfinis supprimés
+    budgetValues: JSON.parse(localStorage.getItem(BUDGET_VALUES_KEY) || "{}") // { itemId: { prevu, reel } }
   };
 
   let db = null;
@@ -97,6 +103,9 @@
             customItems: state.customItems,
             hiddenBaseIds: state.hiddenBaseIds,
             journalEntries: state.journalEntries,
+            budgetCustomItems: state.budgetCustomItems,
+            budgetHiddenIds: state.budgetHiddenIds,
+            budgetValues: state.budgetValues,
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
           });
           return;
@@ -110,9 +119,15 @@
         state.customItems = data.customItems || [];
         state.hiddenBaseIds = data.hiddenBaseIds || [];
         state.journalEntries = data.journalEntries || [];
+        state.budgetCustomItems = data.budgetCustomItems || [];
+        state.budgetHiddenIds = data.budgetHiddenIds || [];
+        state.budgetValues = data.budgetValues || {};
         localStorage.setItem(CUSTOM_KEY, JSON.stringify(state.customItems));
         localStorage.setItem(HIDDEN_KEY, JSON.stringify(state.hiddenBaseIds));
         localStorage.setItem(JOURNAL_KEY, JSON.stringify(state.journalEntries));
+        localStorage.setItem(BUDGET_CUSTOM_KEY, JSON.stringify(state.budgetCustomItems));
+        localStorage.setItem(BUDGET_HIDDEN_KEY, JSON.stringify(state.budgetHiddenIds));
+        localStorage.setItem(BUDGET_VALUES_KEY, JSON.stringify(state.budgetValues));
         renderAll();
         hideBanner();
       },
@@ -132,6 +147,9 @@
         customItems: state.customItems,
         hiddenBaseIds: state.hiddenBaseIds,
         journalEntries: state.journalEntries,
+        budgetCustomItems: state.budgetCustomItems,
+        budgetHiddenIds: state.budgetHiddenIds,
+        budgetValues: state.budgetValues,
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
       },
       { merge: true }
@@ -489,6 +507,7 @@
     renderProgress();
     renderPostcard();
     renderJournal();
+    renderBudget();
     familyCodeDisplay.textContent = state.familyCode || "—";
   }
 
@@ -722,6 +741,218 @@
       <p class="conges-result-line">${dureeNote}</p>
       <p class="conges-result-line">Versée par la CAF, sans lien avec votre salaire — les deux parents peuvent la percevoir en même temps, mais le total est alors plafonné au montant à taux plein.</p>
     `;
+  }
+
+  // ----------------------------------------------------------
+  // Budget arrivée bébé
+  // ----------------------------------------------------------
+  function budgetItemsForCategory(catKey) {
+    const base = (BUDGET_DATA[catKey].items || []).filter((i) => !state.budgetHiddenIds.includes(i.id));
+    const custom = state.budgetCustomItems.filter((c) => c.category === catKey);
+    return base.concat(custom);
+  }
+
+  function budgetAllItems() {
+    return Object.keys(BUDGET_DATA).map((cat) => budgetItemsForCategory(cat)).flat();
+  }
+
+  function getBudgetValue(item) {
+    const override = state.budgetValues[item.id];
+    return {
+      prevu: override && override.prevu !== undefined && override.prevu !== null ? override.prevu : item.prevu,
+      reel: override && override.reel !== undefined && override.reel !== null ? override.reel : null
+    };
+  }
+
+  function setBudgetValue(itemId, field, value) {
+    if (!state.budgetValues[itemId]) state.budgetValues[itemId] = {};
+    state.budgetValues[itemId][field] = value === "" ? null : parseFloat(value);
+    localStorage.setItem(BUDGET_VALUES_KEY, JSON.stringify(state.budgetValues));
+    renderBudgetSummary();
+    pushToCloud();
+  }
+
+  function buildBudgetCategoriesDom() {
+    const container = el("budgetCategories");
+    container.innerHTML = "";
+    Object.keys(BUDGET_DATA).forEach((catKey) => {
+      const section = document.createElement("section");
+      section.className = "budget-section";
+      section.dataset.category = catKey;
+
+      const h2 = document.createElement("h2");
+      h2.textContent = BUDGET_DATA[catKey].label;
+      section.appendChild(h2);
+
+      const list = document.createElement("ul");
+      list.className = "budget-list";
+      list.id = "budget-list-" + catKey;
+      section.appendChild(list);
+
+      container.appendChild(section);
+    });
+  }
+
+  function renderBudgetCategory(catKey) {
+    const list = el("budget-list-" + catKey);
+    if (!list) return;
+    list.innerHTML = "";
+
+    budgetItemsForCategory(catKey).forEach((item) => {
+      const tpl = el("budgetItemTemplate").content.cloneNode(true);
+      const li = tpl.querySelector(".budget-item");
+      const nameEl = tpl.querySelector(".budget-item-name");
+      const prevuInput = tpl.querySelector(".budget-prevu-input");
+      const reelInput = tpl.querySelector(".budget-reel-input");
+      const deleteBtn = tpl.querySelector(".budget-delete");
+
+      const values = getBudgetValue(item);
+      nameEl.textContent = item.name;
+      prevuInput.value = values.prevu;
+      reelInput.value = values.reel === null ? "" : values.reel;
+      if (values.reel !== null) li.classList.add("is-achete");
+
+      prevuInput.addEventListener("change", () => {
+        setBudgetValue(item.id, "prevu", prevuInput.value);
+      });
+      reelInput.addEventListener("change", () => {
+        setBudgetValue(item.id, "reel", reelInput.value);
+        li.classList.toggle("is-achete", reelInput.value !== "");
+      });
+
+      deleteBtn.hidden = false;
+      deleteBtn.addEventListener("click", () => {
+        if (item.custom) {
+          deleteBudgetCustomItem(item.id);
+        } else {
+          deleteBudgetBaseItem(item.id);
+        }
+      });
+
+      list.appendChild(tpl);
+    });
+
+    renderBudgetAddForm(catKey, list);
+  }
+
+  function renderBudgetAddForm(catKey, list) {
+    const wrapper = document.createElement("li");
+    wrapper.className = "add-item-row";
+
+    const toggleBtn = document.createElement("button");
+    toggleBtn.type = "button";
+    toggleBtn.className = "btn-add-step";
+    toggleBtn.textContent = "+ Ajouter un article";
+
+    const form = document.createElement("div");
+    form.className = "add-item-form";
+    form.hidden = true;
+    form.innerHTML = `
+      <input type="text" class="add-item-title" placeholder="Nom de l'article" maxlength="80" />
+      <input type="number" class="add-item-prevu" placeholder="Budget prévu (€)" min="0" step="5" />
+      <div class="add-item-actions">
+        <button type="button" class="btn-ghost add-item-cancel">Annuler</button>
+        <button type="button" class="btn-primary add-item-confirm">Ajouter</button>
+      </div>
+    `;
+
+    toggleBtn.addEventListener("click", () => {
+      form.hidden = false;
+      toggleBtn.hidden = true;
+      form.querySelector(".add-item-title").focus();
+    });
+    form.querySelector(".add-item-cancel").addEventListener("click", () => {
+      form.hidden = true;
+      toggleBtn.hidden = false;
+    });
+    form.querySelector(".add-item-confirm").addEventListener("click", () => {
+      const titleInput = form.querySelector(".add-item-title");
+      const prevuInput = form.querySelector(".add-item-prevu");
+      const title = titleInput.value.trim();
+      if (!title) {
+        titleInput.focus();
+        return;
+      }
+      const prevu = parseFloat(prevuInput.value) || 0;
+      addBudgetCustomItem(catKey, title, prevu);
+      form.hidden = true;
+      toggleBtn.hidden = false;
+      titleInput.value = "";
+      prevuInput.value = "";
+    });
+
+    wrapper.appendChild(toggleBtn);
+    wrapper.appendChild(form);
+    list.appendChild(wrapper);
+  }
+
+  function saveBudgetCustomItems() {
+    localStorage.setItem(BUDGET_CUSTOM_KEY, JSON.stringify(state.budgetCustomItems));
+  }
+  function saveBudgetHiddenIds() {
+    localStorage.setItem(BUDGET_HIDDEN_KEY, JSON.stringify(state.budgetHiddenIds));
+  }
+
+  function addBudgetCustomItem(category, name, prevu) {
+    const id = "budget-custom-" + Date.now() + "-" + Math.random().toString(36).slice(2, 7);
+    state.budgetCustomItems.push({ id, category, name, prevu, custom: true });
+    saveBudgetCustomItems();
+    renderBudgetCategory(category);
+    renderBudgetSummary();
+    pushToCloud();
+  }
+
+  function deleteBudgetCustomItem(id) {
+    const item = state.budgetCustomItems.find((c) => c.id === id);
+    state.budgetCustomItems = state.budgetCustomItems.filter((c) => c.id !== id);
+    delete state.budgetValues[id];
+    saveBudgetCustomItems();
+    if (item) renderBudgetCategory(item.category);
+    renderBudgetSummary();
+    pushToCloud();
+  }
+
+  function deleteBudgetBaseItem(id) {
+    if (!window.confirm("Supprimer cet article du budget ?")) return;
+    let category = null;
+    Object.keys(BUDGET_DATA).forEach((cat) => {
+      if (BUDGET_DATA[cat].items.some((i) => i.id === id)) category = cat;
+    });
+    state.budgetHiddenIds.push(id);
+    delete state.budgetValues[id];
+    saveBudgetHiddenIds();
+    if (category) renderBudgetCategory(category);
+    renderBudgetSummary();
+    pushToCloud();
+  }
+
+  function renderBudgetSummary() {
+    const items = budgetAllItems();
+    let totalPrevu = 0, totalReel = 0, resteAPrevoir = 0, achetes = 0;
+    items.forEach((item) => {
+      const v = getBudgetValue(item);
+      totalPrevu += v.prevu || 0;
+      if (v.reel !== null) {
+        totalReel += v.reel;
+        achetes++;
+      } else {
+        resteAPrevoir += v.prevu || 0;
+      }
+    });
+    el("budgetTotalPrevu").textContent = formatEuros(totalPrevu);
+    el("budgetTotalReel").textContent = formatEuros(totalReel);
+    el("budgetReste").textContent = formatEuros(resteAPrevoir);
+    const pct = items.length ? Math.round((achetes / items.length) * 100) : 0;
+    el("budgetProgressFill").style.width = pct + "%";
+    el("budgetProgressLabel").textContent = pct + " % des articles achetés";
+  }
+
+  function renderBudget() {
+    if (!el("budgetCategories").children.length) {
+      buildBudgetCategoriesDom();
+    }
+    Object.keys(BUDGET_DATA).forEach((catKey) => renderBudgetCategory(catKey));
+    renderBudgetSummary();
   }
 
   // ----------------------------------------------------------

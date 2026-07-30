@@ -73,6 +73,7 @@
       <button type="button" class="tab-btn" data-tab="journal" role="tab" aria-selected="false">Journal</button>
       <button type="button" class="tab-btn" data-tab="nutrition" role="tab" aria-selected="false">Nutrition</button>
       <button type="button" class="tab-btn" data-tab="conges" role="tab" aria-selected="false">Congés</button>
+      <button type="button" class="tab-btn" data-tab="budget" role="tab" aria-selected="false">Budget</button>
     </nav>
 
     <div class="tab-panel" data-tab-panel="accueil">
@@ -244,6 +245,33 @@
 
     </div>
 
+    <div class="tab-panel" data-tab-panel="budget" hidden>
+
+      <div class="budget-summary" id="budgetSummary">
+        <div class="budget-summary-row">
+          <div class="budget-summary-figure">
+            <span class="budget-summary-label">Prévu</span>
+            <span class="budget-summary-value" id="budgetTotalPrevu">0 €</span>
+          </div>
+          <div class="budget-summary-figure">
+            <span class="budget-summary-label">Déjà dépensé</span>
+            <span class="budget-summary-value" id="budgetTotalReel">0 €</span>
+          </div>
+          <div class="budget-summary-figure">
+            <span class="budget-summary-label">Reste à prévoir</span>
+            <span class="budget-summary-value" id="budgetReste">0 €</span>
+          </div>
+        </div>
+        <div class="overall-progress-track">
+          <div class="overall-progress-fill" id="budgetProgressFill"></div>
+        </div>
+        <span class="overall-progress-label" id="budgetProgressLabel">0 % des articles achetés</span>
+      </div>
+
+      <div id="budgetCategories"></div>
+
+    </div>
+
   </main>
 
   <footer class="app-footer" id="appFooter" hidden>
@@ -290,11 +318,23 @@
     <p class="journal-entry-text"></p>
   </li>
 </template>
+<template id="budgetItemTemplate">
+  <li class="budget-item">
+    <div class="budget-item-name"></div>
+    <div class="budget-item-fields">
+      <label>Prévu (€)<input type="number" class="budget-prevu-input" min="0" step="5" /></label>
+      <label>Réel (€)<input type="number" class="budget-reel-input" min="0" step="5" placeholder="—" /></label>
+    </div>
+    <button class="delete-btn budget-delete" type="button" title="Supprimer cet article" hidden>&times;</button>
+  </li>
+</template>
+
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
 <script src="data.js"></script>
 <script src="weekly-data.js"></script>
+<script src="budget-data.js"></script>
 <script src="conges.js"></script>
 <script src="app.js"></script>
 </body>
