@@ -44,6 +44,7 @@
   let docRef = null;
   let unsubscribe = null;
   let pendingLocalWrites = 0;
+  let hasSyncedOnce = false;
 
   // ----------------------------------------------------------
   // Firebase (optionnel) : si non configuré, on reste en local
@@ -92,12 +93,14 @@
   function connectToDoc() {
     if (!db || !state.familyCode) return;
     docRef = db.collection("carnets-voyage").doc(state.familyCode);
+    hasSyncedOnce = false;
 
     if (unsubscribe) unsubscribe();
     unsubscribe = docRef.onSnapshot(
       (snap) => {
         if (!snap.exists) {
           // Premier appareil à utiliser ce code : on initialise le document.
+          hasSyncedOnce = true;
           docRef.set({
             dueDate: state.dueDate,
             completed: state.completed,
@@ -112,6 +115,7 @@
           return;
         }
         const data = snap.data();
+        hasSyncedOnce = true;
         if (pendingLocalWrites > 0) {
           // Une écriture locale est en cours : on ne laisse pas un ancien
           // instantané venir écraser un changement qu'on vient de faire.
@@ -144,8 +148,19 @@
     );
   }
 
-  function pushToCloud() {
+  function pushDueDateOnly() {
     if (!docRef) return;
+    // Écriture volontairement limitée au seul champ dueDate : contrairement à
+    // pushToCloud(), elle ne peut jamais écraser completed/customItems/journal/budget,
+    // même si cet appareil n'a pas encore reçu l'état complet du serveur.
+    docRef.set(
+      { dueDate: state.dueDate, updatedAt: firebase.firestore.FieldValue.serverTimestamp() },
+      { merge: true }
+    );
+  }
+
+  function pushToCloud() {
+    if (!docRef || !hasSyncedOnce) return;
     pendingLocalWrites++;
     docRef
       .set(
@@ -621,7 +636,7 @@
     showApp();
     if (db) {
       connectToDoc();
-      pushToCloud();
+      pushDueDateOnly();
     }
   });
 
