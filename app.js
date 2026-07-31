@@ -163,20 +163,17 @@
     if (!docRef || !hasSyncedOnce) return;
     pendingLocalWrites++;
     docRef
-      .set(
-        {
-          dueDate: state.dueDate,
-          completed: state.completed,
-          customItems: state.customItems,
-          hiddenBaseIds: state.hiddenBaseIds,
-          journalEntries: state.journalEntries,
-          budgetCustomItems: state.budgetCustomItems,
-          budgetHiddenIds: state.budgetHiddenIds,
-          budgetValues: state.budgetValues,
-          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        },
-        { merge: true }
-      )
+      .set({
+        dueDate: state.dueDate,
+        completed: state.completed,
+        customItems: state.customItems,
+        hiddenBaseIds: state.hiddenBaseIds,
+        journalEntries: state.journalEntries,
+        budgetCustomItems: state.budgetCustomItems,
+        budgetHiddenIds: state.budgetHiddenIds,
+        budgetValues: state.budgetValues,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      })
       .catch((err) => {
         console.error("Erreur d'écriture Firestore :", err);
       })
