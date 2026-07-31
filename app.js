@@ -43,6 +43,7 @@
   let db = null;
   let docRef = null;
   let unsubscribe = null;
+  let pendingLocalWrites = 0;
 
   // ----------------------------------------------------------
   // Firebase (optionnel) : si non configuré, on reste en local
@@ -111,6 +112,11 @@
           return;
         }
         const data = snap.data();
+        if (pendingLocalWrites > 0) {
+          // Une écriture locale est en cours : on ne laisse pas un ancien
+          // instantané venir écraser un changement qu'on vient de faire.
+          return;
+        }
         if (data.dueDate && data.dueDate !== state.dueDate) {
           state.dueDate = data.dueDate;
           localStorage.setItem(DUE_KEY, state.dueDate);
@@ -140,20 +146,28 @@
 
   function pushToCloud() {
     if (!docRef) return;
-    docRef.set(
-      {
-        dueDate: state.dueDate,
-        completed: state.completed,
-        customItems: state.customItems,
-        hiddenBaseIds: state.hiddenBaseIds,
-        journalEntries: state.journalEntries,
-        budgetCustomItems: state.budgetCustomItems,
-        budgetHiddenIds: state.budgetHiddenIds,
-        budgetValues: state.budgetValues,
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      },
-      { merge: true }
-    );
+    pendingLocalWrites++;
+    docRef
+      .set(
+        {
+          dueDate: state.dueDate,
+          completed: state.completed,
+          customItems: state.customItems,
+          hiddenBaseIds: state.hiddenBaseIds,
+          journalEntries: state.journalEntries,
+          budgetCustomItems: state.budgetCustomItems,
+          budgetHiddenIds: state.budgetHiddenIds,
+          budgetValues: state.budgetValues,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        },
+        { merge: true }
+      )
+      .catch((err) => {
+        console.error("Erreur d'écriture Firestore :", err);
+      })
+      .finally(() => {
+        pendingLocalWrites = Math.max(0, pendingLocalWrites - 1);
+      });
   }
 
   // ----------------------------------------------------------
