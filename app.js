@@ -1034,6 +1034,8 @@
       if (!header) return;
       const expanded = header.getAttribute("aria-expanded") !== "false";
       header.setAttribute("aria-expanded", String(!expanded));
+      const section = header.closest("section");
+      if (section) section.classList.toggle("is-collapsed", expanded);
     });
   }
 

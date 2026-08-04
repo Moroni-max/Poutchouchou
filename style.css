@@ -845,7 +845,7 @@ input[type="date"], input[type="text"] {
   grid-template-rows: 1fr;
   transition: grid-template-rows 0.32s cubic-bezier(.22,1,.36,1);
 }
-.section-header[aria-expanded="false"] + .section-body {
+.is-collapsed .section-body {
   grid-template-rows: 0fr;
 }
 .section-body-inner { overflow: hidden; }
