@@ -283,8 +283,14 @@ input[type="date"], input[type="text"] {
 .overall-progress-fill {
   height: 100%;
   width: 0%;
-  background: linear-gradient(90deg, var(--sage), var(--ochre));
+  background: linear-gradient(90deg, var(--sage), var(--ochre), var(--sage));
+  background-size: 200% 100%;
+  animation: progressShimmer 3.5s linear infinite;
   transition: width 0.5s ease;
+}
+@keyframes progressShimmer {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: -200% 50%; }
 }
 .overall-progress-label {
   display: block;
@@ -802,6 +808,9 @@ input[type="date"], input[type="text"] {
 .app-tabs::-webkit-scrollbar { display: none; }
 
 .tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
   background: transparent;
   border: none;
   border-radius: 999px;
@@ -813,6 +822,11 @@ input[type="date"], input[type="text"] {
   white-space: nowrap;
   transition: background 0.2s ease, color 0.2s ease;
 }
+.tab-icon {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
 .tab-btn.is-active {
   background: var(--ochre);
   color: var(--ink);
@@ -823,6 +837,11 @@ input[type="date"], input[type="text"] {
 }
 .tab-panel {
   padding-top: 0.5rem;
+  animation: tabPanelFadeIn 0.32s cubic-bezier(.22,1,.36,1);
+}
+@keyframes tabPanelFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 /* ============================================================
@@ -1152,9 +1171,10 @@ input[type="date"], input[type="text"] {
 @media (prefers-reduced-motion: reduce) {
   .check-btn.is-stamping .stamp { animation: none; }
   .traveler-marker .traveler-dot { transition: none; }
-  .overall-progress-fill { transition: none; }
+  .overall-progress-fill { transition: none; animation: none; }
   .hero-inner { animation: none; }
   .checklist-item, .journal-entry, .budget-item { transition: none; }
+  .tab-panel { animation: none; }
 }
 
 /* ============================================================
