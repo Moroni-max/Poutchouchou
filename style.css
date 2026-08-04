@@ -2,22 +2,25 @@
    TOKENS
    ============================================================ */
 :root {
-  --parchment: #F4EBD5;
-  --parchment-deep: #E6D8B5;
-  --ink: #1B2A4A;
+  --parchment: #F6EEDC;
+  --parchment-deep: #EAD9AE;
+  --ink: #16233F;
   --ink-soft: #3A4D6E;
-  --ochre: #C89B3C;
+  --ochre: #C9973F;
   --ochre-deep: #A87B24;
-  --sage: #6E8462;
-  --rust: #B5533C;
-  --line: rgba(27, 42, 74, 0.18);
+  --rust: #B14B33;
+  --sage: #6B8566;
+  --line: rgba(22, 35, 63, 0.18);
+  --cream: #FBF6E8;
 
   --font-display: "Fraunces", "Iowan Old Style", serif;
   --font-body: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
 
-  --radius: 4px;
-  --shadow-paper: 0 1px 2px rgba(27, 42, 74, 0.08), 0 6px 16px rgba(27, 42, 74, 0.06);
+  --radius: 10px;
+  --radius-sm: 6px;
+  --shadow-paper: 0 2px 6px rgba(22, 35, 63, 0.08), 0 10px 26px rgba(22, 35, 63, 0.10);
+  --shadow-lift: 0 4px 10px rgba(22, 35, 63, 0.10), 0 16px 36px rgba(22, 35, 63, 0.14);
 }
 
 * { box-sizing: border-box; }
@@ -67,46 +70,69 @@ button {
    HERO / ITINÉRAIRE
    ============================================================ */
 .hero {
-  padding: 3rem 1.5rem 2rem;
+  position: relative;
+  padding: 4.5rem 1.5rem 3rem;
   text-align: center;
-  border-bottom: 1px solid var(--line);
+  overflow: hidden;
+  background-image:
+    linear-gradient(180deg, rgba(16,24,45,0.32) 0%, rgba(16,24,45,0.62) 55%, rgba(16,24,45,0.92) 100%),
+    url("https://images.unsplash.com/photo-1758810409620-f4961f7431e8?w=1600&q=70&auto=format&fit=crop");
+  background-size: cover;
+  background-position: center 30%;
+  color: var(--cream);
+}
+
+.hero-inner {
+  position: relative;
+  z-index: 1;
+  animation: heroReveal 0.9s cubic-bezier(.22,1,.36,1) both;
+}
+
+@keyframes heroReveal {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .eyebrow {
   font-family: var(--font-mono);
   font-size: 0.72rem;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: var(--ochre-deep);
-  margin: 0 0 0.75rem;
+  color: var(--ochre);
+  margin: 0 0 0.9rem;
 }
 
 .hero h1 {
   font-family: var(--font-display);
   font-weight: 500;
-  font-size: clamp(1.7rem, 5vw, 2.6rem);
-  line-height: 1.15;
-  margin: 0 0 0.5rem;
+  font-size: clamp(2rem, 6vw, 3.2rem);
+  line-height: 1.1;
+  margin: 0 0 0.6rem;
   letter-spacing: -0.01em;
+  color: #fff;
+  text-shadow: 0 2px 18px rgba(0,0,0,0.25);
 }
 
 .subtitle {
   font-style: italic;
   font-family: var(--font-display);
   font-weight: 400;
-  color: var(--ink-soft);
-  margin: 0 0 1.75rem;
-  font-size: 1.05rem;
+  color: rgba(251, 246, 232, 0.88);
+  margin: 0 0 2rem;
+  font-size: 1.1rem;
 }
 
-/* Setup panel */
+/* Setup panel — carte "verre" flottant sur la photo */
 .setup-panel {
   max-width: 380px;
   margin: 0 auto;
-  background: rgba(255,255,255,0.35);
-  border: 1px solid var(--line);
+  background: rgba(251, 246, 232, 0.9);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.4);
   border-radius: var(--radius);
-  padding: 1.25rem 1.5rem 1.5rem;
+  padding: 1.5rem 1.6rem 1.7rem;
+  box-shadow: var(--shadow-lift);
 }
 
 .setup-panel label {
@@ -125,9 +151,9 @@ button {
 input[type="date"], input[type="text"] {
   font-family: var(--font-mono);
   font-size: 0.95rem;
-  padding: 0.6rem 0.7rem;
+  padding: 0.65rem 0.75rem;
   border: 1px solid var(--line);
-  border-radius: var(--radius);
+  border-radius: var(--radius-sm);
   background: #fff;
   color: var(--ink);
   flex: 1;
@@ -143,27 +169,28 @@ input[type="date"], input[type="text"] {
 
 .btn-primary {
   background: var(--ink);
-  color: var(--parchment);
+  color: var(--cream);
   border: none;
-  padding: 0.6rem 1.1rem;
-  border-radius: var(--radius);
+  padding: 0.7rem 1.2rem;
+  border-radius: var(--radius-sm);
   font-weight: 500;
   font-size: 0.9rem;
   white-space: nowrap;
-  transition: background 0.15s ease, transform 0.1s ease;
+  transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
 }
-.btn-primary:hover { background: var(--ink-soft); }
+.btn-primary:hover { background: var(--ink-soft); box-shadow: 0 6px 16px rgba(22,35,63,0.25); }
 .btn-primary:active { transform: scale(0.97); }
 
 .btn-ghost {
-  background: transparent;
-  border: 1px solid var(--line);
-  color: var(--ink-soft);
-  padding: 0.45rem 0.9rem;
-  border-radius: var(--radius);
+  background: rgba(251,246,232,0.12);
+  border: 1px solid rgba(251,246,232,0.5);
+  color: var(--cream);
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-sm);
   font-size: 0.82rem;
+  backdrop-filter: blur(6px);
 }
-.btn-ghost:hover { border-color: var(--ink); color: var(--ink); }
+.btn-ghost:hover { border-color: #fff; background: rgba(251,246,232,0.22); }
 
 .btn-text {
   background: none;
@@ -174,12 +201,12 @@ input[type="date"], input[type="text"] {
   padding: 0;
 }
 
-/* Progress + route */
+/* Progress + route, dessinés directement sur la photo */
 .progress-summary {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.75rem;
+  gap: 1rem;
 }
 
 .week-badge {
@@ -189,13 +216,14 @@ input[type="date"], input[type="text"] {
   font-family: var(--font-mono);
 }
 .week-number {
-  font-size: 2rem;
+  font-size: 2.4rem;
   font-weight: 500;
-  color: var(--ink);
+  color: #fff;
+  text-shadow: 0 2px 14px rgba(0,0,0,0.3);
 }
 .week-label {
   font-size: 0.85rem;
-  color: var(--ink-soft);
+  color: rgba(251,246,232,0.85);
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
@@ -203,24 +231,25 @@ input[type="date"], input[type="text"] {
 .route-wrap {
   width: 100%;
   max-width: 620px;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.35));
 }
 .route-svg { width: 100%; height: auto; display: block; }
 
 .traveler-marker .traveler-dot {
-  fill: var(--rust);
-  stroke: var(--parchment);
-  stroke-width: 2;
+  fill: var(--ochre);
+  stroke: #fff;
+  stroke-width: 2.5;
   transition: transform 0.4s ease;
 }
 
 .waypoint-dot {
-  stroke: var(--parchment);
+  stroke: #fff;
   stroke-width: 2;
 }
 .waypoint-label {
   font-family: var(--font-mono);
   font-size: 11px;
-  fill: var(--ink-soft);
+  fill: rgba(255,255,255,0.9);
   text-anchor: middle;
 }
 
@@ -317,11 +346,16 @@ input[type="date"], input[type="text"] {
   display: flex;
   align-items: flex-start;
   gap: 0.9rem;
-  background: rgba(255,255,255,0.4);
+  background: rgba(255,255,255,0.55);
   border: 1px solid var(--line);
   border-radius: var(--radius);
   padding: 0.85rem 1rem;
-  transition: border-color 0.2s ease, background 0.2s ease;
+  box-shadow: var(--shadow-paper);
+  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+}
+.checklist-item:hover {
+  box-shadow: var(--shadow-lift);
+  transform: translateY(-1px);
 }
 
 .checklist-item.is-done {
@@ -518,11 +552,12 @@ input[type="date"], input[type="text"] {
   display: flex;
   align-items: center;
   gap: 0.9rem;
-  background: rgba(255,255,255,0.4);
+  background: rgba(255,255,255,0.55);
   border: 1px solid var(--line);
   border-radius: var(--radius);
   padding: 0.7rem 1rem;
   flex-wrap: wrap;
+  box-shadow: var(--shadow-paper);
 }
 .budget-item.is-achete {
   background: rgba(110,132,98,0.08);
@@ -702,39 +737,91 @@ input[type="date"], input[type="text"] {
 }
 
 /* ============================================================
+   BANNIÈRES PHOTO DES ONGLETS
+   ============================================================ */
+.tab-banner {
+  position: relative;
+  height: 132px;
+  margin: 1.25rem 1.5rem 0.5rem;
+  border-radius: var(--radius);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 1rem 1.25rem;
+  box-shadow: var(--shadow-paper);
+  background-size: cover;
+  background-position: center;
+}
+.tab-banner::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(16,24,45,0.15) 0%, rgba(16,24,45,0.78) 100%);
+}
+.tab-banner-eyebrow, .tab-banner-title {
+  position: relative;
+  z-index: 1;
+}
+.tab-banner-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ochre);
+  margin: 0 0 0.2rem;
+}
+.tab-banner-title {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 1.5rem;
+  color: #fff;
+  margin: 0;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+
+.tab-banner-journal { background-image: url("https://images.unsplash.com/photo-1704966030464-e80a0dcf2844?w=1000&q=65&auto=format&fit=crop"); }
+.tab-banner-nutrition { background-image: url("https://images.unsplash.com/photo-1573246123716-6b1782bfc499?w=1000&q=65&auto=format&fit=crop"); }
+.tab-banner-conges { background-image: url("https://images.unsplash.com/photo-1514192014812-ae2eff10d0f8?w=1000&q=65&auto=format&fit=crop"); }
+.tab-banner-budget { background-image: url("https://images.unsplash.com/photo-1505043203398-7e4c111acbfa?w=1000&q=65&auto=format&fit=crop"); }
+
+/* ============================================================
    ONGLETS
    ============================================================ */
 .app-tabs {
   display: flex;
-  gap: 0.4rem;
-  padding: 1.25rem 1.5rem 0;
+  gap: 0.3rem;
+  padding: 0.5rem;
+  margin: 1.25rem 1.5rem 0;
+  background: var(--ink);
+  border-radius: 999px;
+  overflow-x: auto;
+  scrollbar-width: none;
 }
+.app-tabs::-webkit-scrollbar { display: none; }
+
 .tab-btn {
-  background: rgba(255,255,255,0.35);
-  border: 1px solid var(--line);
-  border-bottom: none;
-  border-radius: 6px 6px 0 0;
-  padding: 0.55rem 1.1rem;
+  background: transparent;
+  border: none;
+  border-radius: 999px;
+  padding: 0.5rem 1.05rem;
   font-family: var(--font-mono);
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   letter-spacing: 0.03em;
-  color: var(--ink-soft);
-  position: relative;
-  top: 1px;
+  color: rgba(251,246,232,0.6);
+  white-space: nowrap;
+  transition: background 0.2s ease, color 0.2s ease;
 }
 .tab-btn.is-active {
-  background: var(--parchment);
+  background: var(--ochre);
   color: var(--ink);
   font-weight: 600;
-  border-color: var(--line);
-  box-shadow: 0 -2px 0 var(--ochre-deep) inset;
 }
 .tab-btn:not(.is-active):hover {
-  color: var(--ink);
+  color: var(--cream);
 }
 .tab-panel {
-  border-top: 1px solid var(--line);
-  padding-top: 0.25rem;
+  padding-top: 0.5rem;
 }
 
 /* ============================================================
@@ -1065,6 +1152,8 @@ input[type="date"], input[type="text"] {
   .check-btn.is-stamping .stamp { animation: none; }
   .traveler-marker .traveler-dot { transition: none; }
   .overall-progress-fill { transition: none; }
+  .hero-inner { animation: none; }
+  .checklist-item, .journal-entry, .budget-item { transition: none; }
 }
 
 /* ============================================================

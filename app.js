@@ -231,7 +231,7 @@
       circle.setAttribute("cy", p.y);
       circle.setAttribute("r", 7);
       circle.setAttribute("class", "waypoint-dot");
-      circle.setAttribute("fill", done ? "#6E8462" : "#F4EBD5");
+      circle.setAttribute("fill", done ? "#6B8566" : "#FBF6E8");
       waypointsGroup.appendChild(circle);
 
       const label = document.createElementNS(ns, "text");
