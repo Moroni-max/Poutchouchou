@@ -262,7 +262,7 @@
     Object.keys(CHECKLIST_DATA).forEach((tri) => {
       const list = el("checklist-" + tri);
       list.innerHTML = "";
-      itemsForTrimester(tri).forEach((item) => {
+      itemsForTrimester(tri).forEach((item, index) => {
         const tpl = el("checklistItemTemplate").content.cloneNode(true);
         const li = tpl.querySelector(".checklist-item");
         const btn = tpl.querySelector(".check-btn");
@@ -270,6 +270,7 @@
         const note = tpl.querySelector(".item-note");
         const deleteBtn = tpl.querySelector(".delete-btn");
 
+        li.style.animationDelay = Math.min(index * 35, 350) + "ms";
         title.textContent = item.title;
         note.textContent = item.note || "";
         btn.dataset.id = item.id;
@@ -498,23 +499,28 @@
     list.innerHTML = "";
 
     if (!state.journalEntries.length) {
+      list.classList.remove("journal-list-timeline");
       const empty = document.createElement("li");
       empty.className = "journal-empty";
       empty.textContent = "Aucune note pour l'instant — le premier ressenti du jour vous attend.";
       list.appendChild(empty);
       return;
     }
+    list.classList.add("journal-list-timeline");
 
     const sorted = state.journalEntries.slice().sort((a, b) => new Date(b.date) - new Date(a.date));
 
-    sorted.forEach((entry) => {
+    sorted.forEach((entry, index) => {
       const tpl = el("journalEntryTemplate").content.cloneNode(true);
+      const li = tpl.querySelector(".journal-entry");
       const authorEl = tpl.querySelector(".journal-entry-author");
       const moodEl = tpl.querySelector(".journal-entry-mood");
       const dateEl = tpl.querySelector(".journal-entry-date");
       const textEl = tpl.querySelector(".journal-entry-text");
       const deleteBtn = tpl.querySelector(".journal-entry-delete");
 
+      li.classList.add(entry.author === "papa" ? "author-papa" : "author-maman");
+      li.style.animationDelay = Math.min(index * 45, 350) + "ms";
       authorEl.textContent = entry.author === "papa" ? "Papa" : "Maman";
       const moodDef = MOOD_OPTIONS.find((m) => m.id === entry.mood);
       moodEl.textContent = moodDef ? moodDef.emoji : "";
@@ -798,6 +804,14 @@
     pushToCloud();
   }
 
+  const BUDGET_ICONS = {
+    transport: '<path d="M5 16l1.5-5A2 2 0 0 1 8.4 9.5h7.2A2 2 0 0 1 17.5 11L19 16"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/><path d="M5 16h14"/>',
+    chambre: '<path d="M3 18v-6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6"/><path d="M3 18v2M21 18v2"/><path d="M3 13V9a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1"/>',
+    quotidien: '<path d="M10 2h4M10 2v3l-2 2v13a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V7l-2-2V2"/><path d="M8 12h8"/>',
+    vetements: '<path d="M8 4l4 2 4-2 4 4-3 3v11H7V11L4 8z"/>',
+    divers: '<path d="M12 3l7 3v6c0 5-3 8-7 9-4-1-7-4-7-9V6l7-3z"/>'
+  };
+
   function buildBudgetCategoriesDom() {
     const container = el("budgetCategories");
     container.innerHTML = "";
@@ -806,17 +820,43 @@
       section.className = "budget-section";
       section.dataset.category = catKey;
 
-      const h2 = document.createElement("h2");
-      h2.textContent = BUDGET_DATA[catKey].label;
-      section.appendChild(h2);
-
-      const list = document.createElement("ul");
-      list.className = "budget-list";
-      list.id = "budget-list-" + catKey;
-      section.appendChild(list);
+      const iconSvg = BUDGET_ICONS[catKey] || "";
+      section.innerHTML = `
+        <h2 class="section-h2">
+          <button type="button" class="section-header" aria-expanded="true">
+            <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${iconSvg}</svg>
+            ${BUDGET_DATA[catKey].label}
+            <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+        </h2>
+        <div class="category-gauge" id="gauge-${catKey}">
+          <div class="category-gauge-track"><div class="category-gauge-fill"></div></div>
+          <span class="category-gauge-label">—</span>
+        </div>
+        <div class="section-body">
+          <div class="section-body-inner">
+            <ul class="budget-list" id="budget-list-${catKey}"></ul>
+          </div>
+        </div>
+      `;
 
       container.appendChild(section);
     });
+  }
+
+  function renderBudgetCategoryGauge(catKey) {
+    const gauge = el("gauge-" + catKey);
+    if (!gauge) return;
+    const items = budgetItemsForCategory(catKey);
+    let prevu = 0, reel = 0;
+    items.forEach((item) => {
+      const v = getBudgetValue(item);
+      prevu += v.prevu || 0;
+      if (v.reel !== null) reel += v.reel;
+    });
+    const pct = prevu > 0 ? Math.min(100, Math.round((reel / prevu) * 100)) : 0;
+    gauge.querySelector(".category-gauge-fill").style.width = pct + "%";
+    gauge.querySelector(".category-gauge-label").textContent = `${formatEuros(reel)} / ${formatEuros(prevu)}`;
   }
 
   function renderBudgetCategory(catKey) {
@@ -824,7 +864,7 @@
     if (!list) return;
     list.innerHTML = "";
 
-    budgetItemsForCategory(catKey).forEach((item) => {
+    budgetItemsForCategory(catKey).forEach((item, index) => {
       const tpl = el("budgetItemTemplate").content.cloneNode(true);
       const li = tpl.querySelector(".budget-item");
       const nameEl = tpl.querySelector(".budget-item-name");
@@ -832,6 +872,7 @@
       const reelInput = tpl.querySelector(".budget-reel-input");
       const deleteBtn = tpl.querySelector(".budget-delete");
 
+      li.style.animationDelay = Math.min(index * 35, 350) + "ms";
       const values = getBudgetValue(item);
       nameEl.textContent = item.name;
       prevuInput.value = values.prevu;
@@ -840,10 +881,12 @@
 
       prevuInput.addEventListener("change", () => {
         setBudgetValue(item.id, "prevu", prevuInput.value);
+        renderBudgetCategoryGauge(catKey);
       });
       reelInput.addEventListener("change", () => {
         setBudgetValue(item.id, "reel", reelInput.value);
         li.classList.toggle("is-achete", reelInput.value !== "");
+        renderBudgetCategoryGauge(catKey);
       });
 
       deleteBtn.hidden = false;
@@ -859,6 +902,7 @@
     });
 
     renderBudgetAddForm(catKey, list);
+    renderBudgetCategoryGauge(catKey);
   }
 
   function renderBudgetAddForm(catKey, list) {
@@ -982,6 +1026,18 @@
   }
 
   // ----------------------------------------------------------
+  // Accordéons de section
+  // ----------------------------------------------------------
+  function setupAccordions() {
+    document.addEventListener("click", (e) => {
+      const header = e.target.closest(".section-header");
+      if (!header) return;
+      const expanded = header.getAttribute("aria-expanded") !== "false";
+      header.setAttribute("aria-expanded", String(!expanded));
+    });
+  }
+
+  // ----------------------------------------------------------
   // Onglets
   // ----------------------------------------------------------
   function setupTabs() {
@@ -1004,6 +1060,7 @@
   // Init
   // ----------------------------------------------------------
   setupTabs();
+  setupAccordions();
   setupJournalForm();
   setupCongesSimulator();
   const firebaseReady = initFirebase();
