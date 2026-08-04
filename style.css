@@ -2,8 +2,8 @@
    TOKENS
    ============================================================ */
 :root {
-  --parchment: #F6EEDC;
-  --parchment-deep: #EAD9AE;
+  --parchment: #F1E4C7;
+  --parchment-deep: #E2CD97;
   --ink: #16233F;
   --ink-soft: #3A4D6E;
   --ochre: #C9973F;
@@ -12,6 +12,8 @@
   --sage: #6B8566;
   --line: rgba(22, 35, 63, 0.18);
   --cream: #FBF6E8;
+  --card: #FFFDF6;
+  --card-done: #F3F7ED;
 
   --font-display: "Fraunces", "Iowan Old Style", serif;
   --font-body: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
@@ -19,8 +21,8 @@
 
   --radius: 10px;
   --radius-sm: 6px;
-  --shadow-paper: 0 2px 6px rgba(22, 35, 63, 0.08), 0 10px 26px rgba(22, 35, 63, 0.10);
-  --shadow-lift: 0 4px 10px rgba(22, 35, 63, 0.10), 0 16px 36px rgba(22, 35, 63, 0.14);
+  --shadow-paper: 0 2px 6px rgba(22, 35, 63, 0.10), 0 10px 22px rgba(22, 35, 63, 0.10);
+  --shadow-lift: 0 6px 14px rgba(22, 35, 63, 0.14), 0 18px 36px rgba(22, 35, 63, 0.16);
 }
 
 * { box-sizing: border-box; }
@@ -340,7 +342,7 @@ input[type="date"], input[type="text"] {
   display: flex;
   align-items: flex-start;
   gap: 0.9rem;
-  background: rgba(255,255,255,0.55);
+  background: var(--card);
   border: 1px solid var(--line);
   border-radius: var(--radius);
   padding: 0.85rem 1rem;
@@ -353,8 +355,8 @@ input[type="date"], input[type="text"] {
 }
 
 .checklist-item.is-done {
-  background: rgba(110, 132, 98, 0.08);
-  border-color: rgba(110, 132, 98, 0.3);
+  background: rgba(110, 132, 98, 0.14);
+  border-color: rgba(110, 132, 98, 0.4);
 }
 
 .item-text { flex: 1; min-width: 0; }
@@ -380,50 +382,104 @@ input[type="date"], input[type="text"] {
 .check-btn {
   position: relative;
   flex-shrink: 0;
-  width: 44px;
-  height: 44px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
-  border: 2px solid var(--line);
-  background: #fff;
+  border: none;
+  background: linear-gradient(160deg, #fff, #F1EADB);
+  box-shadow:
+    inset 0 2px 3px rgba(22,35,63,0.12),
+    inset 0 -1px 1px rgba(255,255,255,0.6),
+    0 1px 2px rgba(22,35,63,0.15);
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: visible;
+  transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.25s ease;
+}
+
+.check-icon {
+  width: 19px;
+  height: 19px;
+  opacity: 0;
+  transform: scale(0.4);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.check-btn[aria-pressed="true"] {
+  background: linear-gradient(160deg, var(--rust), var(--ochre-deep));
+  box-shadow:
+    0 3px 8px rgba(177,75,51,0.4),
+    0 1px 2px rgba(22,35,63,0.2),
+    inset 0 -2px 3px rgba(0,0,0,0.15);
+}
+.check-btn[aria-pressed="true"] .check-icon {
+  opacity: 1;
+  transform: scale(1);
+}
+.check-btn[aria-pressed="true"]::before {
+  /* anneau façon oblitération postale, autour du cercle plein */
+  content: "";
+  position: absolute;
+  inset: -5px;
+  border-radius: 50%;
+  border: 1.5px dashed rgba(177,75,51,0.55);
 }
 
 .check-btn .stamp {
+  position: absolute;
+  top: -8px;
+  right: -14px;
   font-family: var(--font-mono);
   font-weight: 700;
-  font-size: 0.6rem;
-  letter-spacing: 0.05em;
+  font-size: 0.52rem;
+  letter-spacing: 0.04em;
   color: var(--rust);
-  border: 2px solid var(--rust);
-  border-radius: 4px;
-  padding: 2px 4px;
-  transform: scale(0) rotate(-18deg);
+  background: var(--cream);
+  border: 1.5px solid var(--rust);
+  border-radius: 3px;
+  padding: 1px 3px;
+  transform: scale(0) rotate(-16deg);
   opacity: 0;
   transition: none;
   white-space: nowrap;
+  z-index: 1;
 }
 
 .check-btn[aria-pressed="true"] .stamp {
   opacity: 1;
-  transform: scale(1) rotate(-18deg);
+  transform: scale(1) rotate(-16deg);
 }
 
+.check-btn.is-stamping {
+  animation: btnPop 0.4s cubic-bezier(.36,1.7,.5,1) both;
+}
 .check-btn.is-stamping .stamp {
   animation: stampDown 0.38s cubic-bezier(.36,1.7,.5,1) forwards;
 }
 
+@keyframes btnPop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+
 @keyframes stampDown {
-  0%   { transform: scale(2.4) rotate(-18deg); opacity: 0; }
-  55%  { transform: scale(0.85) rotate(-18deg); opacity: 1; }
-  75%  { transform: scale(1.12) rotate(-18deg); }
-  100% { transform: scale(1) rotate(-18deg); opacity: 1; }
+  0%   { transform: scale(2.4) rotate(-16deg); opacity: 0; }
+  55%  { transform: scale(0.85) rotate(-16deg); opacity: 1; }
+  75%  { transform: scale(1.12) rotate(-16deg); }
+  100% { transform: scale(1) rotate(-16deg); opacity: 1; }
 }
 
 .check-btn:not([aria-pressed="true"]):hover {
-  border-color: var(--ink-soft);
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 2px 3px rgba(22,35,63,0.12),
+    inset 0 -1px 1px rgba(255,255,255,0.6),
+    0 3px 6px rgba(22,35,63,0.2);
+}
+.check-btn:not([aria-pressed="true"]):active {
+  transform: translateY(0) scale(0.94);
 }
 
 .delete-btn {
@@ -469,7 +525,7 @@ input[type="date"], input[type="text"] {
 }
 
 .add-item-form {
-  background: rgba(255,255,255,0.5);
+  background: var(--card);
   border: 1px solid var(--line);
   border-radius: var(--radius);
   padding: 0.9rem 1rem;
@@ -491,7 +547,7 @@ input[type="date"], input[type="text"] {
    ============================================================ */
 .budget-summary {
   margin: 1.5rem 1.5rem 0.5rem;
-  background: rgba(255,255,255,0.4);
+  background: var(--card);
   border: 1px solid var(--line);
   border-radius: var(--radius);
   padding: 1.1rem 1.2rem;
@@ -564,7 +620,7 @@ input[type="date"], input[type="text"] {
   display: flex;
   align-items: center;
   gap: 0.9rem;
-  background: rgba(255,255,255,0.55);
+  background: var(--card);
   border: 1px solid var(--line);
   border-radius: var(--radius);
   padding: 0.7rem 1rem;
@@ -572,8 +628,8 @@ input[type="date"], input[type="text"] {
   box-shadow: var(--shadow-paper);
 }
 .budget-item.is-achete {
-  background: rgba(110,132,98,0.08);
-  border-color: rgba(110,132,98,0.3);
+  background: rgba(110,132,98,0.14);
+  border-color: rgba(110,132,98,0.4);
 }
 
 .budget-item-name {
@@ -719,7 +775,7 @@ input[type="date"], input[type="text"] {
   gap: 0.55rem;
 }
 .nutrition-list li {
-  background: rgba(255,255,255,0.4);
+  background: var(--card);
   border: 1px solid var(--line);
   border-left-width: 3px;
   border-radius: var(--radius);
@@ -930,7 +986,7 @@ input[type="date"], input[type="text"] {
 }
 
 .journal-form {
-  background: rgba(255,255,255,0.4);
+  background: var(--card);
   border: 1px solid var(--line);
   border-radius: var(--radius);
   padding: 1.1rem 1.2rem;
@@ -1265,6 +1321,7 @@ input[type="date"], input[type="text"] {
 
 @media (prefers-reduced-motion: reduce) {
   .check-btn.is-stamping .stamp { animation: none; }
+  .check-btn.is-stamping { animation: none; }
   .traveler-marker .traveler-dot { transition: none; }
   .overall-progress-fill { transition: none; animation: none; }
   .hero-inner { animation: none; }
