@@ -73,6 +73,10 @@
         <svg class="tab-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9"/></svg>
         Accueil
       </button>
+      <button type="button" class="tab-btn" data-tab="developpement" role="tab" aria-selected="false">
+        <svg class="tab-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="3"/><path d="M9 21c0-4 1.5-7 3-7s3 3 3 7"/><path d="M8 13c-1.5 1-2 2.5-2 4"/></svg>
+        Développement
+      </button>
       <button type="button" class="tab-btn" data-tab="journal" role="tab" aria-selected="false">
         <svg class="tab-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5c2-1 5-1 7 1v13c-2-2-5-2-7-1v-13z"/><path d="M20 5.5c-2-1-5-1-7 1v13c2-2 5-2 7-1v-13z"/></svg>
         Journal
@@ -168,6 +172,48 @@
         <div class="section-body">
           <div class="section-body-inner">
             <ul class="checklist" id="checklist-4"></ul>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <div class="tab-panel" data-tab-panel="developpement" hidden>
+
+      <div class="tab-banner tab-banner-developpement">
+        <span class="tab-banner-eyebrow">Onglet</span>
+        <h2 class="tab-banner-title">Développement</h2>
+      </div>
+
+      <section class="dev-section">
+        <div class="fetus-card">
+          <p class="fetus-hint">Fais glisser pour faire pivoter</p>
+          <div class="fetus-stage" id="fetusStage">
+            <div class="fetus-figure" id="fetusFigure">
+              <svg viewBox="0 0 200 200" class="fetus-svg">
+                <defs>
+                  <radialGradient id="fetusGlow" cx="50%" cy="45%" r="60%">
+                    <stop offset="0%" stop-color="#F6E2B8"/>
+                    <stop offset="100%" stop-color="#C9973F" stop-opacity="0"/>
+                  </radialGradient>
+                </defs>
+                <circle cx="100" cy="100" r="85" fill="url(#fetusGlow)"/>
+                <path d="M100 40c-22 0-36 16-36 38 0 14 6 24 6 36 0 16-14 20-14 36 0 14 12 22 26 18-4-10 2-18 10-18 10 0 12 10 8 18 16 4 28-8 28-22 0-14-10-20-10-34 0-10 8-18 8-32 0-24-16-40-26-40z" fill="var(--ochre)" stroke="var(--ink)" stroke-width="2" stroke-linejoin="round"/>
+                <circle cx="90" cy="58" r="3" fill="var(--ink)"/>
+              </svg>
+            </div>
+          </div>
+          <p class="fetus-week-label">Semaine <span id="devWeekNumber">—</span> · taille d'environ <strong id="devSizeName">—</strong></p>
+        </div>
+
+        <div class="dev-info-grid">
+          <div class="dev-info-card">
+            <h3>Ce qui se développe chez bébé</h3>
+            <p id="devBabyText">—</p>
+          </div>
+          <div class="dev-info-card">
+            <h3>Ce que vous pourriez ressentir</h3>
+            <p id="devMomText">—</p>
           </div>
         </div>
       </section>

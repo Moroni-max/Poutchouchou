@@ -538,6 +538,7 @@
     renderChecklists();
     renderProgress();
     renderPostcard();
+    renderDevTab();
     renderJournal();
     renderBudget();
     familyCodeDisplay.textContent = state.familyCode || "—";
@@ -612,6 +613,63 @@
     el("postcardNote").textContent = entry.text;
     el("postcardIcon").innerHTML = produceIconSVG(entry.shape, entry.color, entry.scale);
     el("postcardStamp").textContent = "SA " + week;
+  }
+
+  // ----------------------------------------------------------
+  // Onglet Développement — silhouette évolutive et interactive
+  // ----------------------------------------------------------
+  function renderDevTab() {
+    const week = currentWeek();
+    if (week === null) return;
+    const clampedWeek = Math.max(4, Math.min(40, week));
+    const entry = WEEKLY_DATA[clampedWeek];
+    if (!entry) return;
+
+    el("devWeekNumber").textContent = week;
+    el("devSizeName").textContent = entry.name;
+    el("devBabyText").textContent = entry.text;
+    el("devMomText").textContent = getSymptomsForWeek(week);
+
+    // La silhouette grandit avec l'avancement (0.3 en semaine 4, 1 en semaine 40)
+    const scale = 0.3 + ((clampedWeek - 4) / (40 - 4)) * 0.7;
+    el("fetusFigure").style.setProperty("--fetus-scale", scale.toFixed(2));
+  }
+
+  function setupFetusDrag() {
+    const stage = el("fetusStage");
+    const figure = el("fetusFigure");
+    if (!stage || !figure) return;
+
+    let dragging = false;
+    let startX = 0;
+    let startRot = 0;
+    let currentRot = 0;
+
+    function onDown(clientX) {
+      dragging = true;
+      startX = clientX;
+      startRot = currentRot;
+      figure.classList.add("is-dragging");
+    }
+    function onMove(clientX) {
+      if (!dragging) return;
+      const delta = clientX - startX;
+      currentRot = startRot + delta * 0.6;
+      figure.style.setProperty("--fetus-rot", currentRot + "deg");
+    }
+    function onUp() {
+      if (!dragging) return;
+      dragging = false;
+      figure.classList.remove("is-dragging");
+    }
+
+    stage.addEventListener("mousedown", (e) => onDown(e.clientX));
+    window.addEventListener("mousemove", (e) => onMove(e.clientX));
+    window.addEventListener("mouseup", onUp);
+
+    stage.addEventListener("touchstart", (e) => onDown(e.touches[0].clientX), { passive: true });
+    stage.addEventListener("touchmove", (e) => onMove(e.touches[0].clientX), { passive: true });
+    stage.addEventListener("touchend", onUp);
   }
 
   // ----------------------------------------------------------
@@ -1063,6 +1121,7 @@
   // ----------------------------------------------------------
   setupTabs();
   setupAccordions();
+  setupFetusDrag();
   setupJournalForm();
   setupCongesSimulator();
   const firebaseReady = initFirebase();

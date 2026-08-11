@@ -852,6 +852,10 @@ input[type="date"], input[type="text"] {
 .tab-banner-nutrition { background-image: url("https://images.unsplash.com/photo-1573246123716-6b1782bfc499?w=1000&q=65&auto=format&fit=crop"); }
 .tab-banner-conges { background-image: url("https://images.unsplash.com/photo-1514192014812-ae2eff10d0f8?w=1000&q=65&auto=format&fit=crop"); }
 .tab-banner-budget { background-image: url("https://images.unsplash.com/photo-1505043203398-7e4c111acbfa?w=1000&q=65&auto=format&fit=crop"); }
+.tab-banner-developpement {
+  background-image: none;
+  background: linear-gradient(135deg, var(--ink) 0%, #2C4270 50%, var(--ochre-deep) 130%);
+}
 
 /* ============================================================
    ACCORDÉON DE SECTION
@@ -965,6 +969,106 @@ input[type="date"], input[type="text"] {
 @keyframes tabPanelFadeIn {
   from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================================
+   ONGLET DÉVELOPPEMENT
+   ============================================================ */
+.dev-section {
+  padding: 1.5rem 1.5rem 1rem;
+}
+
+.fetus-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lift);
+  padding: 1.5rem 1.5rem 1.75rem;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.fetus-hint {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin: 0 0 0.75rem;
+}
+
+.fetus-stage {
+  perspective: 700px;
+  width: 100%;
+  max-width: 220px;
+  aspect-ratio: 1;
+  margin: 0 auto;
+  cursor: grab;
+  touch-action: pan-y;
+}
+.fetus-stage:active { cursor: grabbing; }
+
+.fetus-figure {
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transform: scale(var(--fetus-scale, 0.3)) rotateY(var(--fetus-rot, 0deg));
+  transition: transform 0.6s cubic-bezier(.22,1,.36,1);
+  animation: fetusPulse 3.4s ease-in-out infinite;
+}
+.fetus-figure.is-dragging {
+  transition: none;
+  animation-play-state: paused;
+}
+@keyframes fetusPulse {
+  0%, 100% { filter: drop-shadow(0 0 0 rgba(200,155,60,0)); }
+  50% { filter: drop-shadow(0 0 14px rgba(200,155,60,0.35)); }
+}
+
+.fetus-svg { width: 100%; height: 100%; display: block; }
+
+.fetus-week-label {
+  margin: 1rem 0 0;
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+}
+.fetus-week-label strong { color: var(--ink); }
+#devWeekNumber {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--ochre-deep);
+}
+
+.dev-info-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+.dev-info-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--ochre-deep);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-paper);
+  padding: 1.1rem 1.2rem;
+}
+.dev-info-card:nth-child(2) { border-left-color: var(--sage); }
+.dev-info-card h3 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 1rem;
+  margin: 0 0 0.5rem;
+  color: var(--ink);
+}
+.dev-info-card p {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+
+@media (min-width: 640px) {
+  .dev-info-grid { grid-template-columns: 1fr 1fr; }
 }
 
 /* ============================================================
@@ -1330,6 +1434,7 @@ input[type="date"], input[type="text"] {
   .section-body { transition: none; }
   .section-chevron { transition: none; }
   .category-gauge-fill { transition: none; }
+  .fetus-figure { animation: none; transition: none; }
 }
 
 /* ============================================================

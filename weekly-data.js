@@ -44,3 +44,19 @@ const WEEKLY_DATA = {
   39: { name: "une pastèque moyenne", shape: "large-oval", color: "rust",  scale: 9,  text: "Bébé est quasiment prêt. Il continue simplement de prendre du poids." },
   40: { name: "une grosse pastèque",  shape: "large-oval", color: "rust",  scale: 10, text: "Terme atteint : bébé est prêt pour la naissance !" }
 };
+
+// Ce que la future maman peut généralement ressentir à chaque phase —
+// repères généraux et non systématiques, chaque grossesse est différente.
+const SYMPTOM_PHASES = [
+  { min: 0,  max: 7,  text: "Fatigue inhabituelle, nausées matinales possibles, seins sensibles — le corps s'adapte aux premiers bouleversements hormonaux." },
+  { min: 8,  max: 13, text: "Les nausées sont souvent à leur pic durant cette période, l'odorat peut devenir plus sensible, la fatigue reste fréquente." },
+  { min: 14, max: 20, text: "Le regain d'énergie du deuxième trimestre s'installe souvent ici, et les nausées ont tendance à s'estomper." },
+  { min: 21, max: 27, text: "Le ventre s'arrondit nettement. Les mouvements de bébé commencent à se faire sentir plus distinctement." },
+  { min: 28, max: 33, text: "Le dos peut commencer à tirer, l'essoufflement et les remontées digestives deviennent plus fréquents." },
+  { min: 34, max: 40, text: "Le sommeil devient parfois plus difficile à trouver confortablement ; des contractions de Braxton Hicks (faux travail) peuvent apparaître." }
+];
+
+function getSymptomsForWeek(week) {
+  const phase = SYMPTOM_PHASES.find((p) => week >= p.min && week <= p.max);
+  return phase ? phase.text : SYMPTOM_PHASES[0].text;
+}
