@@ -186,40 +186,9 @@
       </div>
 
       <section class="dev-section">
-        <div class="fetus-card">
-          <p class="fetus-hint">Fais glisser pour faire pivoter</p>
-          <div class="fetus-stage" id="fetusStage">
-            <div class="fetus-figure" id="fetusFigure">
-              <svg viewBox="0 0 200 200" class="fetus-svg">
-                <defs>
-                  <radialGradient id="fetusGlow" cx="50%" cy="45%" r="60%">
-                    <stop offset="0%" stop-color="#F6E2B8"/>
-                    <stop offset="100%" stop-color="#C9973F" stop-opacity="0"/>
-                  </radialGradient>
-                </defs>
-                <circle cx="100" cy="100" r="85" fill="url(#fetusGlow)"/>
-
-                <g fill="var(--ink)" stroke="var(--ink)" stroke-linecap="round">
-                  <path d="M 104 92 C 84 98 68 114 66 138 C 65 152 74 162 88 160" fill="none" stroke-width="47"/>
-                  <circle cx="96" cy="104" r="15"/>
-                  <circle cx="82" cy="156" r="16"/>
-                  <circle cx="120" cy="56" r="38.5"/>
-                </g>
-
-                <g fill="var(--ochre)" stroke="var(--ochre)" stroke-linecap="round">
-                  <path d="M 104 92 C 84 98 68 114 66 138 C 65 152 74 162 88 160" fill="none" stroke-width="42"/>
-                  <circle cx="96" cy="104" r="12.5"/>
-                  <circle cx="82" cy="156" r="13.5"/>
-                  <circle cx="120" cy="56" r="36"/>
-                </g>
-
-                <path d="M 100 84 Q 108 92 116 86" fill="none" stroke="var(--ink)" stroke-width="1.6" opacity="0.35" stroke-linecap="round"/>
-                <circle cx="131" cy="52" r="2.6" fill="var(--ink)"/>
-                <path d="M 74 148 C 62 150 54 144 48 152" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round"/>
-              </svg>
-            </div>
-          </div>
-          <p class="fetus-week-label">Semaine <span id="devWeekNumber">—</span> · taille d'environ <strong id="devSizeName">—</strong></p>
+        <div class="dev-size-card">
+          <img class="dev-size-icon" id="devSizeIcon" src="" alt="Illustration du développement du bébé" width="120" height="120" />
+          <p class="dev-week-label">Semaine <span id="devWeekNumber">—</span> · taille d'environ <strong id="devSizeName">—</strong></p>
         </div>
 
         <div class="dev-info-grid">

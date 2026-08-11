@@ -616,7 +616,7 @@
   }
 
   // ----------------------------------------------------------
-  // Onglet Développement — silhouette évolutive et interactive
+  // Onglet Développement
   // ----------------------------------------------------------
   function renderDevTab() {
     const week = currentWeek();
@@ -629,47 +629,7 @@
     el("devSizeName").textContent = entry.name;
     el("devBabyText").textContent = entry.text;
     el("devMomText").textContent = getSymptomsForWeek(week);
-
-    // La silhouette grandit avec l'avancement (0.3 en semaine 4, 1 en semaine 40)
-    const scale = 0.3 + ((clampedWeek - 4) / (40 - 4)) * 0.7;
-    el("fetusFigure").style.setProperty("--fetus-scale", scale.toFixed(2));
-  }
-
-  function setupFetusDrag() {
-    const stage = el("fetusStage");
-    const figure = el("fetusFigure");
-    if (!stage || !figure) return;
-
-    let dragging = false;
-    let startX = 0;
-    let startRot = 0;
-    let currentRot = 0;
-
-    function onDown(clientX) {
-      dragging = true;
-      startX = clientX;
-      startRot = currentRot;
-      figure.classList.add("is-dragging");
-    }
-    function onMove(clientX) {
-      if (!dragging) return;
-      const delta = clientX - startX;
-      currentRot = startRot + delta * 0.6;
-      figure.style.setProperty("--fetus-rot", currentRot + "deg");
-    }
-    function onUp() {
-      if (!dragging) return;
-      dragging = false;
-      figure.classList.remove("is-dragging");
-    }
-
-    stage.addEventListener("mousedown", (e) => onDown(e.clientX));
-    window.addEventListener("mousemove", (e) => onMove(e.clientX));
-    window.addEventListener("mouseup", onUp);
-
-    stage.addEventListener("touchstart", (e) => onDown(e.touches[0].clientX), { passive: true });
-    stage.addEventListener("touchmove", (e) => onMove(e.touches[0].clientX), { passive: true });
-    stage.addEventListener("touchend", onUp);
+    el("devSizeIcon").src = `img/dev/semaine-${String(clampedWeek).padStart(2, "0")}.png`;
   }
 
   // ----------------------------------------------------------
@@ -1121,7 +1081,6 @@
   // ----------------------------------------------------------
   setupTabs();
   setupAccordions();
-  setupFetusDrag();
   setupJournalForm();
   setupCongesSimulator();
   const firebaseReady = initFirebase();
