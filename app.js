@@ -611,7 +611,7 @@
     el("postcardWeekLabel").textContent = "semaine " + week;
     el("postcardSizeName").textContent = entry.name;
     el("postcardNote").textContent = entry.text;
-    el("postcardIcon").innerHTML = produceIconSVG(entry.shape, entry.color, entry.scale);
+    el("postcardIcon").src = `img/dev/semaine-${String(Math.max(4, Math.min(40, week))).padStart(2, "0")}.png`;
     el("postcardStamp").textContent = "SA " + week;
   }
 

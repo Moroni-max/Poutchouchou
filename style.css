@@ -1271,11 +1271,8 @@ input[type="date"], input[type="text"] {
   flex-shrink: 0;
   width: 84px;
   height: 84px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  object-fit: contain;
 }
-.postcard-icon svg { width: 100%; height: 100%; }
 
 .postcard-text { flex: 1; min-width: 0; }
 
