@@ -45,18 +45,50 @@ const WEEKLY_DATA = {
   40: { name: "une grosse pastèque",  shape: "large-oval", color: "rust",  scale: 10, text: "Terme atteint : bébé est prêt pour la naissance !" }
 };
 
-// Ce que la future maman peut généralement ressentir à chaque phase —
+// Ce que la future maman peut généralement ressentir, semaine par semaine —
 // repères généraux et non systématiques, chaque grossesse est différente.
-const SYMPTOM_PHASES = [
-  { min: 0,  max: 7,  text: "Fatigue inhabituelle, nausées matinales possibles, seins sensibles — le corps s'adapte aux premiers bouleversements hormonaux." },
-  { min: 8,  max: 13, text: "Les nausées sont souvent à leur pic durant cette période, l'odorat peut devenir plus sensible, la fatigue reste fréquente." },
-  { min: 14, max: 20, text: "Le regain d'énergie du deuxième trimestre s'installe souvent ici, et les nausées ont tendance à s'estomper." },
-  { min: 21, max: 27, text: "Le ventre s'arrondit nettement. Les mouvements de bébé commencent à se faire sentir plus distinctement." },
-  { min: 28, max: 33, text: "Le dos peut commencer à tirer, l'essoufflement et les remontées digestives deviennent plus fréquents." },
-  { min: 34, max: 40, text: "Le sommeil devient parfois plus difficile à trouver confortablement ; des contractions de Braxton Hicks (faux travail) peuvent apparaître." }
-];
+// Ne remplacent pas l'avis de votre sage-femme ou médecin en cas de doute.
+const WEEKLY_SYMPTOMS = {
+  4:  "Peu ou pas de symptômes pour beaucoup à ce stade. Un léger tiraillement bas-ventre est parfois ressenti au moment de la nidation, les seins peuvent commencer à devenir sensibles.",
+  5:  "La fatigue peut déjà s'installer, les seins sont souvent tendus et sensibles. Quelques nausées légères ou envies alimentaires inhabituelles peuvent démarrer.",
+  6:  "Les nausées (dites \"matinales\" bien qu'elles puissent survenir à toute heure) apparaissent ou s'intensifient chez beaucoup de femmes, avec un odorat souvent plus sensible.",
+  7:  "Nausées et fatigue restent fréquentes. Ballonnements et besoin d'uriner plus souvent qu'avant sont également classiques à ce stade.",
+  8:  "Les nausées sont parfois à leur maximum pour certaines. Salivation excessive, sautes d'humeur et grande fatigue restent courantes.",
+  9:  "Nausées et fatigue toujours fréquentes. Un léger gonflement du ventre peut se faire sentir, plus souvent lié aux ballonnements qu'à l'utérus lui-même, encore petit à ce stade.",
+  10: "L'utérus commence tout juste à sortir du bassin. Des tiraillements bas-ventre occasionnels, parfois proches d'une douleur de règles, sont habituels — généralement bénins en l'absence de douleur intense ou de saignement.",
+  11: "Les nausées commencent parfois à s'atténuer chez certaines, persistent chez d'autres. Des maux de tête liés aux changements hormonaux peuvent apparaître.",
+  12: "L'utérus atteint à peu près le bord supérieur du pubis. C'est souvent autour de cette période que les nausées commencent à s'estomper pour beaucoup de femmes.",
+  13: "Fin du premier trimestre pour la plupart des suivis : fatigue et nausées ont tendance à s'améliorer, sans que ce soit systématique pour toutes.",
+  14: "Le regain d'énergie souvent associé au deuxième trimestre démarre ici pour beaucoup. Les tiraillements des ligaments ronds, qui soutiennent l'utérus en pleine croissance, peuvent se faire sentir davantage.",
+  15: "Pas de ventre bien visible pour beaucoup à ce stade, et c'est normal — le fond utérin se situe généralement entre le pubis et le nombril. De petits tiraillements bas-ventre, sans douleur ni saignement, restent habituels.",
+  16: "Le ventre commence parfois tout juste à s'arrondir, mais ça reste très variable d'une femme à l'autre — souvent plus progressif pour un premier enfant. Le nez peut être plus fréquemment bouché (rhinite de grossesse).",
+  17: "Les tout premiers mouvements du bébé peuvent commencer à être perçus par certaines, souvent décrits comme de petites bulles ou des papillons dans le ventre.",
+  18: "Le fond utérin se rapproche du niveau du nombril. Les tiraillements ligamentaires restent possibles, en particulier lors de mouvements brusques ou en changeant de position.",
+  19: "Le ventre devient généralement plus visible pour la majorité des femmes à ce stade. De légers maux de dos peuvent apparaître avec le changement de posture.",
+  20: "À mi-parcours, le fond utérin est en général proche du niveau du nombril. Les mouvements du bébé deviennent souvent plus reconnaissables et réguliers.",
+  21: "L'appétit peut augmenter nettement. Des crampes dans les jambes, surtout nocturnes, sont fréquentes à partir de cette période.",
+  22: "La peau du ventre peut commencer à tirailler ou démanger légèrement en s'étirant — une hydratation régulière de la peau peut aider au confort.",
+  23: "Un léger gonflement des jambes ou l'apparition de petites varices sont possibles chez certaines, liés à l'augmentation du volume sanguin.",
+  24: "Le dépistage du diabète gestationnel est généralement proposé autour de cette période. Des maux de dos peuvent commencer à s'installer avec le poids croissant du ventre.",
+  25: "Le nombril peut commencer à s'aplatir ou ressortir légèrement. Les maux de dos, s'ils sont présents, peuvent s'accentuer.",
+  26: "Bébé réagit désormais aux sons extérieurs ; certaines femmes le sentent \"sursauter\" à un bruit soudain.",
+  27: "Fin du deuxième trimestre pour la plupart des suivis : un léger essoufflement à l'effort ou une sensation de lourdeur peuvent commencer à se faire sentir.",
+  28: "Entrée dans le troisième trimestre. Les contractions de Braxton Hicks (contractions d'entraînement, sans dilatation) peuvent commencer à se faire sentir — généralement indolores et irrégulières.",
+  29: "Le souffle peut se faire plus court, l'utérus prenant de la place sous les côtes. Le sommeil peut devenir plus difficile à trouver confortablement.",
+  30: "Des remontées acides ou des brûlures d'estomac sont fréquentes à ce stade, l'estomac étant comprimé par l'utérus.",
+  31: "Le besoin d'uriner redevient plus fréquent avec la pression sur la vessie. Une fatigue différente de celle du premier trimestre peut revenir.",
+  32: "Le bas du dos et le bassin peuvent tirer davantage à l'approche du terme. Les mouvements du bébé restent importants à surveiller, même s'ils deviennent parfois un peu plus amples et moins fréquents faute de place.",
+  33: "Trouver une position confortable pour dormir devient parfois plus difficile ; un coussin de grossesse peut aider au confort.",
+  34: "Le col peut commencer à se préparer en douceur, sans que ce soit systématiquement perceptible. Les contractions de Braxton Hicks sont parfois plus fréquentes.",
+  35: "Une sensation de pression pelvienne peut s'accentuer si bébé commence à descendre dans le bassin.",
+  36: "Fatigue et impatience sont fréquentes à l'approche du terme, pendant que le corps continue de se préparer pour l'accouchement.",
+  37: "Bébé est considéré comme \"à terme précoce\" — la naissance peut survenir à tout moment à partir d'ici, sans que ce soit automatique ni attendu si vite.",
+  38: "L'instinct du \"nid\" peut se manifester chez certaines, avec une envie soudaine de tout préparer et ranger.",
+  39: "La perte du bouchon muqueux est possible à ce stade, sans indiquer forcément un accouchement imminent.",
+  40: "Terme atteint — le travail peut démarrer à tout moment, ou même un peu après : c'est encore tout à fait normal jusque vers 41-42 semaines selon le suivi proposé."
+};
 
 function getSymptomsForWeek(week) {
-  const phase = SYMPTOM_PHASES.find((p) => week >= p.min && week <= p.max);
-  return phase ? phase.text : SYMPTOM_PHASES[0].text;
+  const w = Math.max(4, Math.min(40, week));
+  return WEEKLY_SYMPTOMS[w] || WEEKLY_SYMPTOMS[4];
 }
