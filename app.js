@@ -10,6 +10,8 @@
   const BUDGET_CUSTOM_KEY = "cdv_budgetCustom";
   const BUDGET_HIDDEN_KEY = "cdv_budgetHidden";
   const BUDGET_VALUES_KEY = "cdv_budgetValues";
+  const BUDGET_CATS_KEY = "cdv_budgetCustomCats";
+  const BUDGET_HIDDEN_CATS_KEY = "cdv_budgetHiddenCats";
   const WEEKS_TOTAL = 40;
 
   const MOOD_OPTIONS = [
@@ -37,7 +39,9 @@
     journalEntries: JSON.parse(localStorage.getItem(JOURNAL_KEY) || "[]"), // [{id, date, author, mood, text}]
     budgetCustomItems: JSON.parse(localStorage.getItem(BUDGET_CUSTOM_KEY) || "[]"), // [{id, category, name, prevu}]
     budgetHiddenIds: JSON.parse(localStorage.getItem(BUDGET_HIDDEN_KEY) || "[]"), // ids d'articles prédéfinis supprimés
-    budgetValues: JSON.parse(localStorage.getItem(BUDGET_VALUES_KEY) || "{}") // { itemId: { prevu, reel } }
+    budgetValues: JSON.parse(localStorage.getItem(BUDGET_VALUES_KEY) || "{}"), // { itemId: { prevu, reel } }
+    budgetCustomCategories: JSON.parse(localStorage.getItem(BUDGET_CATS_KEY) || "[]"), // [{id, label}]
+    budgetHiddenCategories: JSON.parse(localStorage.getItem(BUDGET_HIDDEN_CATS_KEY) || "[]") // clés de catégories masquées
   };
 
   let db = null;
@@ -110,6 +114,8 @@
             budgetCustomItems: state.budgetCustomItems,
             budgetHiddenIds: state.budgetHiddenIds,
             budgetValues: state.budgetValues,
+            budgetCustomCategories: state.budgetCustomCategories,
+            budgetHiddenCategories: state.budgetHiddenCategories,
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
           });
           return;
@@ -132,12 +138,16 @@
         state.budgetCustomItems = data.budgetCustomItems || [];
         state.budgetHiddenIds = data.budgetHiddenIds || [];
         state.budgetValues = data.budgetValues || {};
+        state.budgetCustomCategories = data.budgetCustomCategories || [];
+        state.budgetHiddenCategories = data.budgetHiddenCategories || [];
         localStorage.setItem(CUSTOM_KEY, JSON.stringify(state.customItems));
         localStorage.setItem(HIDDEN_KEY, JSON.stringify(state.hiddenBaseIds));
         localStorage.setItem(JOURNAL_KEY, JSON.stringify(state.journalEntries));
         localStorage.setItem(BUDGET_CUSTOM_KEY, JSON.stringify(state.budgetCustomItems));
         localStorage.setItem(BUDGET_HIDDEN_KEY, JSON.stringify(state.budgetHiddenIds));
         localStorage.setItem(BUDGET_VALUES_KEY, JSON.stringify(state.budgetValues));
+        localStorage.setItem(BUDGET_CATS_KEY, JSON.stringify(state.budgetCustomCategories));
+        localStorage.setItem(BUDGET_HIDDEN_CATS_KEY, JSON.stringify(state.budgetHiddenCategories));
         renderAll();
         hideBanner();
       },
@@ -172,6 +182,8 @@
         budgetCustomItems: state.budgetCustomItems,
         budgetHiddenIds: state.budgetHiddenIds,
         budgetValues: state.budgetValues,
+        budgetCustomCategories: state.budgetCustomCategories,
+        budgetHiddenCategories: state.budgetHiddenCategories,
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
       })
       .catch((err) => {
@@ -797,13 +809,22 @@
   // Budget arrivée bébé
   // ----------------------------------------------------------
   function budgetItemsForCategory(catKey) {
-    const base = (BUDGET_DATA[catKey].items || []).filter((i) => !state.budgetHiddenIds.includes(i.id));
+    const base = ((BUDGET_DATA[catKey] && BUDGET_DATA[catKey].items) || []).filter((i) => !state.budgetHiddenIds.includes(i.id));
     const custom = state.budgetCustomItems.filter((c) => c.category === catKey);
     return base.concat(custom);
   }
 
+  // Catégories visibles : prédéfinies non masquées + catégories créées par l'utilisateur.
+  function budgetVisibleCategories() {
+    const base = Object.keys(BUDGET_DATA)
+      .filter((k) => !state.budgetHiddenCategories.includes(k))
+      .map((k) => ({ key: k, label: BUDGET_DATA[k].label, custom: false }));
+    const custom = state.budgetCustomCategories.map((c) => ({ key: c.id, label: c.label, custom: true }));
+    return base.concat(custom);
+  }
+
   function budgetAllItems() {
-    return Object.keys(BUDGET_DATA).map((cat) => budgetItemsForCategory(cat)).flat();
+    return budgetVisibleCategories().map((c) => budgetItemsForCategory(c.key)).flat();
   }
 
   function getBudgetValue(item) {
@@ -829,27 +850,30 @@
     vetements: '<path d="M8 4l4 2 4-2 4 4-3 3v11H7V11L4 8z"/>',
     divers: '<path d="M12 3l7 3v6c0 5-3 8-7 9-4-1-7-4-7-9V6l7-3z"/>'
   };
+  const BUDGET_ICON_CUSTOM = '<path d="M20 13l-7 7-9-9V4h7z"/><circle cx="8.5" cy="8.5" r="1.2"/>';
 
   function buildBudgetCategoriesDom() {
     const container = el("budgetCategories");
     container.innerHTML = "";
-    Object.keys(BUDGET_DATA).forEach((catKey) => {
+    budgetVisibleCategories().forEach((cat) => {
+      const catKey = cat.key;
       const section = document.createElement("section");
       section.className = "budget-section";
       section.dataset.category = catKey;
 
-      const iconSvg = BUDGET_ICONS[catKey] || "";
+      const iconSvg = BUDGET_ICONS[catKey] || BUDGET_ICON_CUSTOM;
       section.innerHTML = `
         <h2 class="section-h2">
           <button type="button" class="section-header" aria-expanded="true">
             <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${iconSvg}</svg>
-            ${BUDGET_DATA[catKey].label}
+            <span class="budget-cat-label"></span>
             <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
           </button>
         </h2>
         <div class="category-gauge" id="gauge-${catKey}">
           <div class="category-gauge-track"><div class="category-gauge-fill"></div></div>
           <span class="category-gauge-label">—</span>
+          <button type="button" class="cat-delete-btn" title="Supprimer cette catégorie">Supprimer</button>
         </div>
         <div class="section-body">
           <div class="section-body-inner">
@@ -857,6 +881,9 @@
           </div>
         </div>
       `;
+
+      section.querySelector(".budget-cat-label").textContent = cat.label;
+      section.querySelector(".cat-delete-btn").addEventListener("click", () => deleteBudgetCategory(cat));
 
       container.appendChild(section);
     });
@@ -1035,11 +1062,114 @@
     el("budgetProgressLabel").textContent = pct + " % des articles achetés";
   }
 
-  function renderBudget() {
-    if (!el("budgetCategories").children.length) {
-      buildBudgetCategoriesDom();
+  // Gestion des catégories (ajout / suppression / restauration)
+  let budgetCatSignature = null;
+
+  function saveBudgetCategories() {
+    localStorage.setItem(BUDGET_CATS_KEY, JSON.stringify(state.budgetCustomCategories));
+    localStorage.setItem(BUDGET_HIDDEN_CATS_KEY, JSON.stringify(state.budgetHiddenCategories));
+  }
+
+  function addBudgetCategory(label) {
+    const id = "budget-cat-" + Date.now() + "-" + Math.random().toString(36).slice(2, 7);
+    state.budgetCustomCategories.push({ id, label });
+    saveBudgetCategories();
+    renderBudget();
+    pushToCloud();
+  }
+
+  function deleteBudgetCategory(cat) {
+    if (cat.custom) {
+      const n = state.budgetCustomItems.filter((i) => i.category === cat.key).length;
+      const msg = n
+        ? `Supprimer la catégorie « ${cat.label} » et ses ${n} article(s) ?`
+        : `Supprimer la catégorie « ${cat.label} » ?`;
+      if (!window.confirm(msg)) return;
+      state.budgetCustomItems.filter((i) => i.category === cat.key).forEach((i) => delete state.budgetValues[i.id]);
+      state.budgetCustomItems = state.budgetCustomItems.filter((i) => i.category !== cat.key);
+      state.budgetCustomCategories = state.budgetCustomCategories.filter((c) => c.id !== cat.key);
+      localStorage.setItem(BUDGET_CUSTOM_KEY, JSON.stringify(state.budgetCustomItems));
+      localStorage.setItem(BUDGET_VALUES_KEY, JSON.stringify(state.budgetValues));
+    } else {
+      // Catégorie prédéfinie : on la masque seulement, articles et montants saisis restent conservés
+      // (elle peut être restaurée à tout moment).
+      if (!window.confirm(`Masquer la catégorie « ${cat.label} » ? Vos montants sont conservés, vous pourrez la restaurer.`)) return;
+      state.budgetHiddenCategories.push(cat.key);
     }
-    Object.keys(BUDGET_DATA).forEach((catKey) => renderBudgetCategory(catKey));
+    saveBudgetCategories();
+    renderBudget();
+    pushToCloud();
+  }
+
+  function restoreBudgetCategories() {
+    state.budgetHiddenCategories = [];
+    saveBudgetCategories();
+    renderBudget();
+    pushToCloud();
+  }
+
+  function renderBudgetCategoryTools() {
+    const box = el("budgetCategoryTools");
+    if (!box) return;
+    box.innerHTML = "";
+
+    const toggleBtn = document.createElement("button");
+    toggleBtn.type = "button";
+    toggleBtn.className = "btn-add-step";
+    toggleBtn.textContent = "+ Ajouter une catégorie";
+
+    const form = document.createElement("div");
+    form.className = "add-item-form";
+    form.hidden = true;
+    form.innerHTML = `
+      <input type="text" class="add-cat-title" placeholder="Nom de la catégorie" maxlength="60" />
+      <div class="add-item-actions">
+        <button type="button" class="btn-ghost add-cat-cancel">Annuler</button>
+        <button type="button" class="btn-primary add-cat-confirm">Ajouter</button>
+      </div>
+    `;
+    const input = form.querySelector(".add-cat-title");
+    const confirm = () => {
+      const label = input.value.trim();
+      if (!label) { input.focus(); return; }
+      addBudgetCategory(label);
+    };
+    toggleBtn.addEventListener("click", () => {
+      form.hidden = false;
+      toggleBtn.hidden = true;
+      input.focus();
+    });
+    form.querySelector(".add-cat-cancel").addEventListener("click", () => {
+      form.hidden = true;
+      toggleBtn.hidden = false;
+    });
+    form.querySelector(".add-cat-confirm").addEventListener("click", confirm);
+    input.addEventListener("keydown", (e) => { if (e.key === "Enter") confirm(); });
+
+    box.appendChild(toggleBtn);
+    box.appendChild(form);
+
+    if (state.budgetHiddenCategories.length) {
+      const restore = document.createElement("button");
+      restore.type = "button";
+      restore.className = "cat-restore-btn";
+      restore.textContent = `Restaurer les catégories masquées (${state.budgetHiddenCategories.length})`;
+      restore.addEventListener("click", restoreBudgetCategories);
+      box.appendChild(restore);
+    }
+  }
+
+  function renderBudget() {
+    const cats = budgetVisibleCategories();
+    const signature = cats.map((c) => c.key + ":" + c.label).join("|");
+    // On ne reconstruit le DOM que si la liste des catégories a changé
+    // (pour ne pas replier les sections ouvertes à chaque synchronisation).
+    if (signature !== budgetCatSignature || !el("budgetCategories").children.length) {
+      buildBudgetCategoriesDom();
+      budgetCatSignature = signature;
+    }
+    cats.forEach((c) => renderBudgetCategory(c.key));
+    renderBudgetCategoryTools();
     renderBudgetSummary();
   }
 
